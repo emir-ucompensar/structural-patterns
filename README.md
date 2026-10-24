@@ -4,7 +4,7 @@ This repository holds the LaTeX source of the design report and the Java
 application that implements it.
 
 **Looking for the program?** The source code, the build instructions and the
-instructions to run it are in [`program/README.md`](program/README.md).
+instructions to run it are in [`program/`](program/)
 
 ## APA7 Paper Template
 
