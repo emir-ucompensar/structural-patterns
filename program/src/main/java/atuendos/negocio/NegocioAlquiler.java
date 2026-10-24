@@ -14,6 +14,7 @@ import atuendos.modelo.Cliente;
 import atuendos.modelo.Empleado;
 import atuendos.modelo.Prenda;
 import atuendos.modelo.ServicioAlquiler;
+import atuendos.modelo.TipoPrenda;
 import atuendos.persistencia.ClienteRepositorio;
 import atuendos.persistencia.ClienteRepositorioSqlite;
 import atuendos.persistencia.Conexion;
@@ -29,8 +30,10 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -199,6 +202,96 @@ public class NegocioAlquiler {
             alquiladas.add(prenda);
         }
         return servicios.guardar(hoy, fechaAlquiler, empleado, cliente, alquiladas);
+    }
+
+    /**
+     * Consulta un servicio por su número.
+     *
+     * @param numero consecutivo del servicio
+     * @return el servicio con todos sus datos
+     * @throws AtuendosException si no existe
+     */
+    public ServicioAlquiler consultarServicio(int numero) throws AtuendosException {
+        return servicios.buscar(numero).orElseThrow(
+                () -> new AtuendosException(String.format(Constantes.MSG_SERVICIO_NO_EXISTE, numero)));
+    }
+
+    /**
+     * Consulta un cliente y sus servicios vigentes, es decir, con fecha de
+     * alquiler igual o posterior a la de hoy, ordenados por esa fecha.
+     *
+     * @param clienteId identificación del cliente
+     * @return el cliente y sus servicios vigentes
+     * @throws AtuendosException si el cliente no está registrado
+     */
+    public ServiciosDeCliente consultarServiciosDeCliente(String clienteId) throws AtuendosException {
+        String id = obligatorio(Constantes.CAMPO_IDENTIFICACION, clienteId);
+        Cliente cliente = clientes.buscar(id).orElseThrow(
+                () -> new AtuendosException(String.format(Constantes.MSG_CLIENTE_NO_REGISTRADO, id)));
+        return new ServiciosDeCliente(cliente, servicios.buscarPorCliente(id, LocalDate.now(reloj)));
+    }
+
+    /**
+     * Consulta los servicios de una fecha de alquiler.
+     *
+     * @param fecha fecha de alquiler
+     * @return los servicios de esa fecha, que pueden ser ninguno
+     * @throws AtuendosException si falla la base de datos
+     */
+    public List<ServicioAlquiler> consultarServiciosPorFecha(LocalDate fecha) throws AtuendosException {
+        if (fecha == null) {
+            throw new AtuendosException(
+                    String.format(Constantes.MSG_CAMPO_OBLIGATORIO, Constantes.CAMPO_FECHA_ALQUILER));
+        }
+        return servicios.buscarPorFecha(fecha);
+    }
+
+    /**
+     * Consulta las prendas de una talla, separadas por tipo.
+     *
+     * @param talla talla buscada
+     * @return las prendas por tipo; todos los tipos aparecen, aunque sin prendas
+     * @throws AtuendosException si falta la talla o falla la base de datos
+     */
+    public Map<TipoPrenda, List<Prenda>> consultarPrendasPorTalla(String talla) throws AtuendosException {
+        Map<TipoPrenda, List<Prenda>> porTipo = new EnumMap<>(TipoPrenda.class);
+        for (TipoPrenda tipo : TipoPrenda.values()) {
+            porTipo.put(tipo, new ArrayList<>());
+        }
+        for (Prenda prenda : prendas.buscarPorTalla(obligatorio(Constantes.CAMPO_TALLA, talla))) {
+            porTipo.get(prenda.getTipo()).add(prenda);
+        }
+        return porTipo;
+    }
+
+    /**
+     * Lista todas las prendas registradas.
+     *
+     * @return las prendas ordenadas por tipo y referencia
+     * @throws AtuendosException si falla la base de datos
+     */
+    public List<Prenda> listarPrendas() throws AtuendosException {
+        return prendas.listar();
+    }
+
+    /**
+     * Lista todos los clientes registrados.
+     *
+     * @return los clientes ordenados por nombre
+     * @throws AtuendosException si falla la base de datos
+     */
+    public List<Cliente> listarClientes() throws AtuendosException {
+        return clientes.listar();
+    }
+
+    /**
+     * Lista todos los empleados registrados.
+     *
+     * @return los empleados ordenados por nombre
+     * @throws AtuendosException si falla la base de datos
+     */
+    public List<Empleado> listarEmpleados() throws AtuendosException {
+        return empleados.listar();
     }
 
     private static String obligatorio(String campo, String valor) throws AtuendosException {

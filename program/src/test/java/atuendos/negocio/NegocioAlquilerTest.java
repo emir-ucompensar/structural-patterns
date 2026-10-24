@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import atuendos.comun.AtuendosException;
 import atuendos.comun.Constantes;
 import atuendos.fabrica.DatosPrenda;
+import atuendos.modelo.Prenda;
 import atuendos.modelo.ServicioAlquiler;
 import atuendos.modelo.TipoPrenda;
 import atuendos.persistencia.BaseTemporal;
@@ -115,6 +116,47 @@ class NegocioAlquilerTest {
                 () -> negocio.registrarCliente("101", " ", "Calle 1", "300", "x@correo.co"));
         assertThrows(AtuendosException.class,
                 () -> negocio.registrarEmpleado("201", "Nombre", "Calle 1", "300", ""));
+    }
+
+    @Test
+    void consultaUnServicioPorNumero() throws AtuendosException {
+        negocio.registrarServicio("100", "200", List.of("F-01"), ALQUILER);
+        assertEquals("Ana Pérez", negocio.consultarServicio(1).getCliente().getNombre());
+        assertThrows(AtuendosException.class, () -> negocio.consultarServicio(99));
+    }
+
+    @Test
+    void consultaLosServiciosVigentesDeUnClienteOrdenadosPorFecha() throws AtuendosException {
+        negocio.registrarServicio("100", "200", List.of("F-01"), ALQUILER.plusDays(3));
+        negocio.registrarServicio("100", "200", List.of("F-02"), ALQUILER);
+        ServiciosDeCliente resultado = negocio.consultarServiciosDeCliente("100");
+        assertEquals("Ana Pérez", resultado.cliente().getNombre());
+        assertEquals(2, resultado.vigentes().size());
+        assertEquals(ALQUILER, resultado.vigentes().get(0).getFechaAlquiler());
+        assertThrows(AtuendosException.class, () -> negocio.consultarServiciosDeCliente("999"));
+    }
+
+    @Test
+    void consultaServiciosPorFecha() throws AtuendosException {
+        negocio.registrarServicio("100", "200", List.of("F-01"), ALQUILER);
+        assertEquals(1, negocio.consultarServiciosPorFecha(ALQUILER).size());
+        assertEquals(0, negocio.consultarServiciosPorFecha(ALQUILER.plusDays(1)).size());
+    }
+
+    @Test
+    void consultaPrendasPorTallaSeparadasPorTipo() throws AtuendosException {
+        Map<TipoPrenda, List<Prenda>> porTipo = negocio.consultarPrendasPorTalla("s");
+        assertEquals(2, porTipo.get(TipoPrenda.DISFRAZ).size());
+        assertEquals(0, porTipo.get(TipoPrenda.DAMA).size());
+        assertEquals(3, porTipo.size());
+        assertThrows(AtuendosException.class, () -> negocio.consultarPrendasPorTalla(" "));
+    }
+
+    @Test
+    void listaLoRegistrado() throws AtuendosException {
+        assertEquals(1, negocio.listarClientes().size());
+        assertEquals(1, negocio.listarEmpleados().size());
+        assertEquals(2, negocio.listarPrendas().size());
     }
 
     @Test
