@@ -5,4 +5,43 @@
 % Use this section for measured data, computed outputs, figures, or other
 % findings produced by the study.
 
-% Placeholder for results content
+La aplicación implementa las operaciones solicitadas, y las 114 pruebas automáticas pasan sin fallos ni errores. La \intab{tab:resultados} resume el resultado de cada operación.
+
+\begin{table}[H]
+\centering
+\caption{Resultados por operación}
+\label{tab:resultados}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}p{4.3cm}X@{}}
+\toprule
+Operación & Resultado comprobado \\
+\midrule
+Registrar prenda, cliente y empleado & Registra los tres tipos de prenda y las personas. Rechaza datos vacíos y repetidos, y pide otra referencia cuando la escrita ya existe. \\
+\addlinespace
+Registrar servicio de alquiler & Asigna el consecutivo y la fecha del sistema. Valida que cliente, empleado y prendas existan, que no se repitan prendas, que estén disponibles y que la fecha no sea pasada. Si falla una validación, no guarda nada. \\
+\addlinespace
+Consultar servicio por número & Muestra el servicio con cliente, empleado y prendas, e informa si el número no existe. \\
+\addlinespace
+Consultar servicios de un cliente & Muestra los servicios vigentes ordenados por fecha de alquiler. \\
+\addlinespace
+Consultar servicios por fecha & Lista los servicios de la fecha, e informa si no hay ninguno. \\
+\addlinespace
+Consultar prendas por talla & Acepta una o varias tallas y separa las prendas por tipo. Exige elegir al menos una talla. \\
+\addlinespace
+Registrar prenda para lavandería & Registra con prioridad o por orden de llegada, y rechaza una prenda que ya está pendiente. \\
+\addlinespace
+Ver prendas pendientes de envío & Ordena primero las prioritarias y luego por llegada, sin enviarlas. \\
+\addlinespace
+Enviar prendas a lavandería & Envía la cantidad pedida con la notificación de fecha y datos. Si hay menos prendas, envía las que haya, y rechaza cantidades no positivas. \\
+\addlinespace
+Manejo de errores & Muestra mensajes claros, incluidos los de la base de datos, y la aplicación no se cierra. \\
+\bottomrule
+\end{tabularx}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{table}
+
+Maven genera \texttt{atuendos.jar} con las dependencias empaquetadas, y el programa crea \texttt{atuendos.db} en el primer arranque si el archivo no existe.
+
+Ejecuté el programa a mano en una terminal real, y la selección con flechas, la limpieza de pantalla entre ventanas y la lista de lavandería funcionaron como esperaba. El resumen de las pruebas por clase está en los apéndices.
