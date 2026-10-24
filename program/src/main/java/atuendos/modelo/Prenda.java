@@ -48,22 +48,47 @@ public abstract class Prenda {
      */
     public abstract String detalle();
 
+    /**
+     * Devuelve el código que identifica a la prenda.
+     *
+     * @return la referencia
+     */
     public String getReferencia() {
         return referencia;
     }
 
+    /**
+     * Devuelve el color de la prenda.
+     *
+     * @return el color
+     */
     public String getColor() {
         return color;
     }
 
+    /**
+     * Devuelve la marca de la prenda.
+     *
+     * @return la marca
+     */
     public String getMarca() {
         return marca;
     }
 
+    /**
+     * Devuelve la talla de la prenda.
+     *
+     * @return la talla
+     */
     public String getTalla() {
         return talla;
     }
 
+    /**
+     * Devuelve el valor del alquiler de la prenda.
+     *
+     * @return el valor del alquiler
+     */
     public double getValorAlquiler() {
         return valorAlquiler;
     }

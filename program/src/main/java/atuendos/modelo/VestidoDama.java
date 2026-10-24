@@ -45,14 +45,29 @@ public class VestidoDama extends Prenda {
         return String.format("pedrería %s, %s, %d piezas", pedreria ? "sí" : "no", altura, cantidadPiezas);
     }
 
+    /**
+     * Indica si el vestido lleva pedrería.
+     *
+     * @return verdadero si lleva pedrería
+     */
     public boolean isPedreria() {
         return pedreria;
     }
 
+    /**
+     * Devuelve la altura del vestido.
+     *
+     * @return si es largo o corto
+     */
     public Altura getAltura() {
         return altura;
     }
 
+    /**
+     * Devuelve la cantidad de piezas del vestido.
+     *
+     * @return la cantidad de piezas
+     */
     public int getCantidadPiezas() {
         return cantidadPiezas;
     }

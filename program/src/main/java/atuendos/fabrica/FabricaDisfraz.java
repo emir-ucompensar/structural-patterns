@@ -17,6 +17,12 @@ import atuendos.modelo.TipoPrenda;
  */
 public class FabricaDisfraz extends FabricaPrenda {
 
+    /**
+     * Crea la fábrica de disfraces.
+     */
+    public FabricaDisfraz() {
+    }
+
     @Override
     protected TipoPrenda tipoProducto() {
         return TipoPrenda.DISFRAZ;

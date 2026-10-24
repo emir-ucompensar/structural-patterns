@@ -42,26 +42,56 @@ public class ServicioAlquiler {
         this.prendas = List.copyOf(prendas);
     }
 
+    /**
+     * Devuelve el consecutivo que identifica al servicio.
+     *
+     * @return el número del servicio
+     */
     public int getNumero() {
         return numero;
     }
 
+    /**
+     * Devuelve la fecha del sistema en que se registró el servicio.
+     *
+     * @return la fecha de solicitud
+     */
     public LocalDate getFechaSolicitud() {
         return fechaSolicitud;
     }
 
+    /**
+     * Devuelve la fecha para la que se alquilan las prendas.
+     *
+     * @return la fecha de alquiler
+     */
     public LocalDate getFechaAlquiler() {
         return fechaAlquiler;
     }
 
+    /**
+     * Devuelve el empleado que atendió el servicio.
+     *
+     * @return el empleado
+     */
     public Empleado getEmpleado() {
         return empleado;
     }
 
+    /**
+     * Devuelve el cliente que alquila.
+     *
+     * @return el cliente
+     */
     public Cliente getCliente() {
         return cliente;
     }
 
+    /**
+     * Devuelve las prendas alquiladas en el servicio.
+     *
+     * @return las prendas, en una lista inmutable
+     */
     public List<Prenda> getPrendas() {
         return prendas;
     }

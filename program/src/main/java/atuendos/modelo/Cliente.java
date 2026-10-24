@@ -27,6 +27,11 @@ public class Cliente extends Persona {
         this.correo = correo;
     }
 
+    /**
+     * Devuelve el correo electrónico del cliente.
+     *
+     * @return el correo
+     */
     public String getCorreo() {
         return correo;
     }

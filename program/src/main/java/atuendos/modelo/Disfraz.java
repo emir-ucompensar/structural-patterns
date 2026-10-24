@@ -39,6 +39,11 @@ public class Disfraz extends Prenda {
         return "disfraz de " + nombre;
     }
 
+    /**
+     * Devuelve el nombre del disfraz.
+     *
+     * @return el nombre
+     */
     public String getNombre() {
         return nombre;
     }

@@ -10,6 +10,8 @@ package atuendos.modelo;
  * Altura de un vestido de dama.
  */
 public enum Altura {
+    /** Vestido largo. */
     LARGO,
+    /** Vestido corto. */
     CORTO
 }

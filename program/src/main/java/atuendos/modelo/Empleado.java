@@ -27,6 +27,11 @@ public class Empleado extends Persona {
         this.cargo = cargo;
     }
 
+    /**
+     * Devuelve el cargo que desempeña el empleado.
+     *
+     * @return el cargo
+     */
     public String getCargo() {
         return cargo;
     }

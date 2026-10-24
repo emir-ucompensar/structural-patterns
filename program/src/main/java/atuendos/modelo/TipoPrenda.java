@@ -10,7 +10,10 @@ package atuendos.modelo;
  * Tipo de prenda que alquila el negocio.
  */
 public enum TipoPrenda {
+    /** Vestido de dama. */
     DAMA,
+    /** Traje de caballero. */
     CABALLERO,
+    /** Disfraz. */
     DISFRAZ
 }

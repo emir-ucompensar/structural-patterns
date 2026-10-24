@@ -10,7 +10,10 @@ package atuendos.modelo;
  * Accesorio de un traje de caballero.
  */
 public enum Accesorio {
+    /** Corbata. */
     CORBATA,
+    /** Corbatín. */
     CORBATIN,
+    /** Plastrón. */
     PLASTRON
 }

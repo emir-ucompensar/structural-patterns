@@ -42,10 +42,20 @@ public class TrajeCaballero extends Prenda {
         return String.format("traje %s, %s", tipoTraje, accesorio);
     }
 
+    /**
+     * Devuelve el tipo de traje.
+     *
+     * @return el tipo de traje
+     */
     public TipoTraje getTipoTraje() {
         return tipoTraje;
     }
 
+    /**
+     * Devuelve el accesorio que acompaña al traje.
+     *
+     * @return el accesorio
+     */
     public Accesorio getAccesorio() {
         return accesorio;
     }

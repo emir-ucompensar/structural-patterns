@@ -18,6 +18,12 @@ import atuendos.modelo.TipoPrenda;
 public abstract class FabricaPrenda {
 
     /**
+     * Crea la fábrica base; solo la usan las fábricas concretas.
+     */
+    protected FabricaPrenda() {
+    }
+
+    /**
      * Elige la fábrica que corresponde al tipo de prenda.
      *
      * @param tipo tipo de prenda

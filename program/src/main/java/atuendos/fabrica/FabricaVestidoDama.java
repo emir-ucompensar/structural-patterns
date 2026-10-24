@@ -18,6 +18,12 @@ import atuendos.modelo.VestidoDama;
  */
 public class FabricaVestidoDama extends FabricaPrenda {
 
+    /**
+     * Crea la fábrica de vestidos de dama.
+     */
+    public FabricaVestidoDama() {
+    }
+
     @Override
     protected TipoPrenda tipoProducto() {
         return TipoPrenda.DAMA;

@@ -19,6 +19,12 @@ import atuendos.modelo.TrajeCaballero;
  */
 public class FabricaTrajeCaballero extends FabricaPrenda {
 
+    /**
+     * Crea la fábrica de trajes de caballero.
+     */
+    public FabricaTrajeCaballero() {
+    }
+
     @Override
     protected TipoPrenda tipoProducto() {
         return TipoPrenda.CABALLERO;

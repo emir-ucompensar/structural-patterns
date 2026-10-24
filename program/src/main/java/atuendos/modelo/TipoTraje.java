@@ -10,8 +10,12 @@ package atuendos.modelo;
  * Tipo de traje de caballero.
  */
 public enum TipoTraje {
+    /** Traje convencional. */
     CONVENCIONAL,
+    /** Frac. */
     FRAC,
+    /** Sacoleva. */
     SACOLEVA,
+    /** Otro tipo de traje. */
     OTRO
 }
