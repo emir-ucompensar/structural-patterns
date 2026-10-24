@@ -1,0 +1,21 @@
+# Maven build output and packaged artifacts
+target/
+*.jar
+*.class
+dependency-reduced-pom.xml
+
+# Local SQLite databases created when running the application
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# JVM crash logs
+hs_err_pid*.log
+
+# Editor and IDE files
+.vscode/
+.idea/
+.classpath
+.project
+.settings/
