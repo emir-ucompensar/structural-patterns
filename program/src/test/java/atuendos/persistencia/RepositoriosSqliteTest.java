@@ -24,6 +24,7 @@ import atuendos.modelo.VestidoDama;
 
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,10 +149,12 @@ class RepositoriosSqliteTest {
         prendas.guardar(new VestidoDama("D-01", "rojo", "Marca", "S", 80000, true, Altura.LARGO, 2));
         prendas.guardar(new TrajeCaballero("C-01", "negro", "Marca", "L", 90000, TipoTraje.FRAC, Aderezo.CORBATA));
         assertEquals(3, prendas.listar().size());
-        assertEquals(2, prendas.buscarPorTalla("S").size());
-        assertEquals(2, prendas.buscarPorTalla("s").size());
-        assertEquals("C-01", prendas.buscarPorTalla("L").get(0).getReferencia());
-        assertTrue(prendas.buscarPorTalla("XXL").isEmpty());
+        assertEquals(2, prendas.buscarPorTallas(List.of("S")).size());
+        assertEquals(2, prendas.buscarPorTallas(List.of("s")).size());
+        assertEquals("C-01", prendas.buscarPorTallas(List.of("L")).get(0).getReferencia());
+        assertEquals(3, prendas.buscarPorTallas(List.of("S", "l")).size());
+        assertTrue(prendas.buscarPorTallas(List.of("XXL")).isEmpty());
+        assertTrue(prendas.buscarPorTallas(List.of()).isEmpty());
     }
 
     @Test

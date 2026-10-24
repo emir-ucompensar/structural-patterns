@@ -22,8 +22,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,7 +42,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
             + "pedreria, altura, cantidad_piezas, tipo_traje, aderezo, nombre_disfraz FROM prenda ";
     private static final String BUSCAR = COLUMNAS + "WHERE referencia = ?";
     private static final String LISTAR = COLUMNAS + "ORDER BY tipo, referencia";
-    private static final String POR_TALLA = COLUMNAS + "WHERE talla = ? COLLATE NOCASE ORDER BY tipo, referencia";
+    private static final String POR_TALLAS = COLUMNAS + "WHERE UPPER(talla) IN (%s) ORDER BY tipo, referencia";
 
     private final Connection conexion;
 
@@ -115,9 +117,15 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
     }
 
     @Override
-    public List<Prenda> buscarPorTalla(String talla) throws AtuendosException {
-        try (PreparedStatement sentencia = conexion.prepareStatement(POR_TALLA)) {
-            sentencia.setString(1, talla);
+    public List<Prenda> buscarPorTallas(List<String> tallas) throws AtuendosException {
+        if (tallas.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String marcadores = String.join(", ", Collections.nCopies(tallas.size(), "?"));
+        try (PreparedStatement sentencia = conexion.prepareStatement(String.format(POR_TALLAS, marcadores))) {
+            for (int i = 0; i < tallas.size(); i++) {
+                sentencia.setString(i + 1, tallas.get(i).toUpperCase(Locale.ROOT));
+            }
             return leerTodas(sentencia);
         } catch (SQLException e) {
             throw new AtuendosException(Constantes.MSG_ERROR_BD, e);

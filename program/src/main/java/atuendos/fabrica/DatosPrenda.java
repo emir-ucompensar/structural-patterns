@@ -35,6 +35,16 @@ public record DatosPrenda(TipoPrenda tipo, String referencia, String color, Stri
         especificos = especificos == null ? Map.of() : Map.copyOf(especificos);
     }
 
+    /**
+     * Devuelve una copia con otra talla.
+     *
+     * @param nuevaTalla talla de la copia
+     * @return los mismos datos con la talla indicada
+     */
+    public DatosPrenda conTalla(String nuevaTalla) {
+        return new DatosPrenda(tipo, referencia, color, marca, nuevaTalla, valorAlquiler, especificos);
+    }
+
     String texto(String campo) throws AtuendosException {
         String valor = especificos.get(campo);
         if (valor == null || valor.isBlank()) {

@@ -145,11 +145,35 @@ class NegocioAlquilerTest {
 
     @Test
     void consultaPrendasPorTallaSeparadasPorTipo() throws AtuendosException {
-        Map<TipoPrenda, List<Prenda>> porTipo = negocio.consultarPrendasPorTalla("s");
+        Map<TipoPrenda, List<Prenda>> porTipo = negocio.consultarPrendasPorTallas(List.of("s"));
         assertEquals(2, porTipo.get(TipoPrenda.DISFRAZ).size());
         assertEquals(0, porTipo.get(TipoPrenda.DAMA).size());
         assertEquals(3, porTipo.size());
-        assertThrows(AtuendosException.class, () -> negocio.consultarPrendasPorTalla(" "));
+        assertThrows(AtuendosException.class, () -> negocio.consultarPrendasPorTallas(List.of()));
+    }
+
+    @Test
+    void consultaPrendasDeVariasTallas() throws AtuendosException {
+        negocio.registrarPrenda(new DatosPrenda(TipoPrenda.DISFRAZ, "F-03", "rojo", "Marca", "m", 30000,
+                Map.of(Constantes.CAMPO_NOMBRE_DISFRAZ, "Pirata")));
+        assertEquals(3, negocio.consultarPrendasPorTallas(List.of("S", "M")).get(TipoPrenda.DISFRAZ).size());
+        assertEquals(1, negocio.consultarPrendasPorTallas(List.of("M")).get(TipoPrenda.DISFRAZ).size());
+    }
+
+    @Test
+    void normalizaLaTallaARegistrar() throws AtuendosException {
+        Prenda prenda = negocio.registrarPrenda(new DatosPrenda(TipoPrenda.DISFRAZ, "F-04", "rojo", "Marca",
+                " xl ", 30000, Map.of(Constantes.CAMPO_NOMBRE_DISFRAZ, "Pirata")));
+        assertEquals("XL", prenda.getTalla());
+    }
+
+    @Test
+    void rechazaTallasNoAdmitidas() {
+        for (String talla : List.of("38", "Smal", "", " ")) {
+            DatosPrenda datos = new DatosPrenda(TipoPrenda.DISFRAZ, "F-09", "rojo", "Marca", talla, 30000,
+                    Map.of(Constantes.CAMPO_NOMBRE_DISFRAZ, "Pirata"));
+            assertThrows(AtuendosException.class, () -> negocio.registrarPrenda(datos));
+        }
     }
 
     @Test

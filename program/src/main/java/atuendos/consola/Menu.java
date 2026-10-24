@@ -170,7 +170,7 @@ public class Menu {
         String referencia = terminal.leerObligatorio("Referencia");
         String color = terminal.leerObligatorio("Color");
         String marca = terminal.leerObligatorio("Marca");
-        String talla = terminal.leerObligatorio("Talla");
+        String talla = Constantes.TALLAS.get(terminal.elegir("Talla", Constantes.TALLAS));
         double valor = terminal.leerDecimal("Valor del alquiler");
         Map<String, String> especificos = new HashMap<>();
         switch (tipo) {
@@ -260,10 +260,12 @@ public class Menu {
 
     private void consultarPrendasPorTalla() throws AtuendosException {
         terminal.seccion("Consultar prendas por talla");
-        String talla = terminal.leerObligatorio("Talla");
-        Map<TipoPrenda, List<Prenda>> porTipo = negocio.consultarPrendasPorTalla(talla);
+        List<String> tallas = terminal.elegirVarias("Tallas", Constantes.TALLAS, 1).stream()
+                .map(Constantes.TALLAS::get).toList();
+        Map<TipoPrenda, List<Prenda>> porTipo = negocio.consultarPrendasPorTallas(tallas);
+        String etiquetaTallas = (tallas.size() == 1 ? "talla " : "tallas ") + String.join(", ", tallas);
         for (Map.Entry<TipoPrenda, List<Prenda>> entrada : porTipo.entrySet()) {
-            terminal.seccion(titulo(entrada.getKey()) + " - talla " + talla);
+            terminal.seccion(titulo(entrada.getKey()) + " - " + etiquetaTallas);
             if (entrada.getValue().isEmpty()) {
                 terminal.linea("Sin prendas.");
             } else {

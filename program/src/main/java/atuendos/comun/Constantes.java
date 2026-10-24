@@ -6,6 +6,8 @@
  */
 package atuendos.comun;
 
+import java.util.List;
+
 /**
  * Constantes compartidas por toda la aplicación.
  */
@@ -117,6 +119,12 @@ public final class Constantes {
 
     /** Nombre del campo de cantidad, usado en mensajes. */
     public static final String CAMPO_CANTIDAD = "cantidad";
+
+    /** Tallas admitidas para las prendas, de menor a mayor. */
+    public static final List<String> TALLAS = List.of("XS", "S", "M", "L", "XL", "XXL");
+
+    /** Mensaje cuando la talla no está entre las admitidas; recibe la talla y la lista. */
+    public static final String MSG_TALLA_INVALIDA = "La talla '%s' no es válida. Tallas admitidas: %s.";
 
     private Constantes() {
     }

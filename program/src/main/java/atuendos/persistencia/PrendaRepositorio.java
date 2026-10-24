@@ -43,11 +43,11 @@ public interface PrendaRepositorio {
     List<Prenda> listar() throws AtuendosException;
 
     /**
-     * Lista las prendas de una talla, sin distinguir mayúsculas.
+     * Lista las prendas de una o varias tallas, sin distinguir mayúsculas.
      *
-     * @param talla talla buscada
+     * @param tallas tallas buscadas
      * @return las prendas ordenadas por tipo y referencia
      * @throws AtuendosException si falla la base de datos
      */
-    List<Prenda> buscarPorTalla(String talla) throws AtuendosException;
+    List<Prenda> buscarPorTallas(List<String> tallas) throws AtuendosException;
 }

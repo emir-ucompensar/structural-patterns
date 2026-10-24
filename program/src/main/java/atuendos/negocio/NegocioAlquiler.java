@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -157,7 +158,7 @@ public class NegocioAlquiler {
         if (datos.tipo() == null) {
             throw new AtuendosException(String.format(Constantes.MSG_CAMPO_OBLIGATORIO, Constantes.CAMPO_TIPO));
         }
-        Prenda prenda = FabricaPrenda.para(datos.tipo()).crearPrenda(datos);
+        Prenda prenda = FabricaPrenda.para(datos.tipo()).crearPrenda(datos.conTalla(validarTalla(datos.talla())));
         prendas.guardar(prenda);
         return prenda;
     }
@@ -255,18 +256,21 @@ public class NegocioAlquiler {
     }
 
     /**
-     * Consulta las prendas de una talla, separadas por tipo.
+     * Consulta las prendas de una o varias tallas, separadas por tipo.
      *
-     * @param talla talla buscada
+     * @param tallas tallas buscadas
      * @return las prendas por tipo; todos los tipos aparecen, aunque sin prendas
-     * @throws AtuendosException si falta la talla o falla la base de datos
+     * @throws AtuendosException si no se indica ninguna talla o falla la base de datos
      */
-    public Map<TipoPrenda, List<Prenda>> consultarPrendasPorTalla(String talla) throws AtuendosException {
+    public Map<TipoPrenda, List<Prenda>> consultarPrendasPorTallas(List<String> tallas) throws AtuendosException {
+        if (tallas == null || tallas.isEmpty()) {
+            throw new AtuendosException(String.format(Constantes.MSG_CAMPO_OBLIGATORIO, Constantes.CAMPO_TALLA));
+        }
         Map<TipoPrenda, List<Prenda>> porTipo = new EnumMap<>(TipoPrenda.class);
         for (TipoPrenda tipo : TipoPrenda.values()) {
             porTipo.put(tipo, new ArrayList<>());
         }
-        for (Prenda prenda : prendas.buscarPorTalla(obligatorio(Constantes.CAMPO_TALLA, talla))) {
+        for (Prenda prenda : prendas.buscarPorTallas(tallas)) {
             porTipo.get(prenda.getTipo()).add(prenda);
         }
         return porTipo;
@@ -344,6 +348,15 @@ public class NegocioAlquiler {
         }
         LocalDate hoy = LocalDate.now(reloj);
         return new EnvioLavanderia(hoy, lavanderia.enviar(cantidad, hoy));
+    }
+
+    private static String validarTalla(String talla) throws AtuendosException {
+        String normalizada = obligatorio(Constantes.CAMPO_TALLA, talla).toUpperCase(Locale.ROOT);
+        if (!Constantes.TALLAS.contains(normalizada)) {
+            throw new AtuendosException(String.format(Constantes.MSG_TALLA_INVALIDA, talla.trim(),
+                    String.join(", ", Constantes.TALLAS)));
+        }
+        return normalizada;
     }
 
     private static String obligatorio(String campo, String valor) throws AtuendosException {

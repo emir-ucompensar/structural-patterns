@@ -35,7 +35,8 @@ class MenuTest {
 
     private static final String CLIENTE = "1\n2\n100\nAna Pérez\nCalle 1\n300\nana@correo.co\n";
     private static final String EMPLEADO = "1\n3\n200\nLuis Gómez\nCarrera 2\n301\nAdministrador\n";
-    private static final String DISFRAZ = "1\n1\n3\nF-01\nverde\nMarca\nS\n40000\nDinosaurio\n";
+    private static final String DISFRAZ = "1\n1\n3\nF-01\nverde\nMarca\n2\n40000\nDinosaurio\n";
+    private static final String DISFRAZ_M = "1\n1\n3\nF-02\nazul\nMarca\n3\n45000\nPirata\n";
 
     @TempDir
     Path directorio;
@@ -156,11 +157,27 @@ class MenuTest {
 
     @Test
     void consultaLasPrendasPorTallaSeparadasPorTipo() {
-        String salida = ejecutar(DISFRAZ + "3\n1\ns\n0\n");
-        assertTrue(salida.contains("Vestidos de dama - talla s"));
+        String salida = ejecutar(DISFRAZ + "3\n1\n2\n0\n");
+        assertTrue(salida.contains("Vestidos de dama - talla S"));
         assertTrue(salida.contains("Sin prendas."));
-        assertTrue(salida.contains("Disfraces - talla s"));
+        assertTrue(salida.contains("Disfraces - talla S"));
         assertTrue(salida.contains("F-01"));
+    }
+
+    @Test
+    void consultaVariasTallasAlMismoTiempo() {
+        String salida = ejecutar(DISFRAZ + DISFRAZ_M + "3\n1\n2, 3\n0\n");
+        assertTrue(salida.contains("Disfraces - tallas S, M"));
+        assertTrue(salida.contains("F-01"));
+        assertTrue(salida.contains("F-02"));
+    }
+
+    @Test
+    void exigeElegirAlMenosUnaTalla() {
+        String salida = ejecutar("3\n1\n\n9\n1\n0\n");
+        assertTrue(salida.contains("Elige al menos 1"));
+        assertTrue(salida.contains("Opción no válida"));
+        assertTrue(salida.contains("talla XS"));
     }
 
     @Test
