@@ -52,6 +52,8 @@ readonly DEFAULT_METHOD="pdflatex"
 readonly DEFAULT_LANGUAGE="english"
 readonly DEFAULT_PERIOD="year"
 
+readonly MAX_EXTRA_PASSES=3
+
 readonly SUPPORTED_LANGUAGES="english spanish"
 readonly SUPPORTED_PERIODS="year semester"
 
@@ -636,6 +638,16 @@ run_pdflatex_pipeline() {
     run_bibtex_if_needed || return "$EXIT_BUILD"
     run_pdflatex_pass "Apply bibliography and references" || return "$EXIT_BUILD"
     run_pdflatex_pass "Finalize cross references and PDF" || return "$EXIT_BUILD"
+
+    # Page-dependent output (such as the final signature) can need extra passes
+    # when the page count changes late. Rerun while TeX asks for it.
+    local extra=0
+    while [ "$extra" -lt "$MAX_EXTRA_PASSES" ] \
+        && grep -q 'Rerun to get' "${BUILD_DIR}/${OUTPUT_BASE}.log"; do
+        extra=$((extra + 1))
+        run_pdflatex_pass "Stabilize page-dependent output (pass ${extra})" \
+            || return "$EXIT_BUILD"
+    done
 }
 
 #
