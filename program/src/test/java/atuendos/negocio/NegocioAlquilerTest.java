@@ -160,6 +160,28 @@ class NegocioAlquilerTest {
     }
 
     @Test
+    void registraVeYEnviaPrendasDeLavanderia() throws AtuendosException {
+        negocio.registrarEnLavanderia("F-01", false);
+        negocio.registrarEnLavanderia("F-02", true);
+        assertEquals("F-02", negocio.listarLavanderiaPendiente().get(0).prenda().getReferencia());
+        assertEquals(2, negocio.listarLavanderiaPendiente().size());
+        EnvioLavanderia envio = negocio.enviarALavanderia(1);
+        assertEquals(HOY, envio.fecha());
+        assertEquals("F-02", envio.prendas().get(0).prenda().getReferencia());
+        assertEquals(1, negocio.listarLavanderiaPendiente().size());
+    }
+
+    @Test
+    void rechazaLavanderiaConDatosInvalidos() throws AtuendosException {
+        assertThrows(AtuendosException.class, () -> negocio.registrarEnLavanderia("X-99", false));
+        assertThrows(AtuendosException.class, () -> negocio.registrarEnLavanderia(" ", false));
+        negocio.registrarEnLavanderia("F-01", false);
+        assertThrows(AtuendosException.class, () -> negocio.registrarEnLavanderia("F-01", true));
+        assertThrows(AtuendosException.class, () -> negocio.enviarALavanderia(0));
+        assertThrows(AtuendosException.class, () -> negocio.enviarALavanderia(-2));
+    }
+
+    @Test
     void rechazaPrendaSinTipo() {
         DatosPrenda sinTipo = new DatosPrenda(null, "Z-01", "rojo", "Marca", "S", 1, Map.of());
         assertThrows(AtuendosException.class, () -> negocio.registrarPrenda(sinTipo));

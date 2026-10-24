@@ -13,12 +13,15 @@ import atuendos.fabrica.FabricaPrenda;
 import atuendos.modelo.Cliente;
 import atuendos.modelo.Empleado;
 import atuendos.modelo.Prenda;
+import atuendos.modelo.PrendaEnLavanderia;
 import atuendos.modelo.ServicioAlquiler;
 import atuendos.modelo.TipoPrenda;
 import atuendos.persistencia.ClienteRepositorio;
 import atuendos.persistencia.ClienteRepositorioSqlite;
 import atuendos.persistencia.Conexion;
 import atuendos.persistencia.EmpleadoRepositorio;
+import atuendos.persistencia.LavanderiaRepositorio;
+import atuendos.persistencia.LavanderiaRepositorioSqlite;
 import atuendos.persistencia.EmpleadoRepositorioSqlite;
 import atuendos.persistencia.PrendaRepositorio;
 import atuendos.persistencia.PrendaRepositorioSqlite;
@@ -47,6 +50,7 @@ public class NegocioAlquiler {
     private final EmpleadoRepositorio empleados;
     private final PrendaRepositorio prendas;
     private final ServicioRepositorio servicios;
+    private final LavanderiaRepositorio lavanderia;
     private final Clock reloj;
 
     /**
@@ -56,14 +60,17 @@ public class NegocioAlquiler {
      * @param empleados almacén de empleados
      * @param prendas almacén de prendas
      * @param servicios almacén de servicios
-     * @param reloj reloj que da la fecha de solicitud
+     * @param lavanderia lista de lavandería
+     * @param reloj reloj que da la fecha de solicitud y de envío
      */
     public NegocioAlquiler(ClienteRepositorio clientes, EmpleadoRepositorio empleados,
-            PrendaRepositorio prendas, ServicioRepositorio servicios, Clock reloj) {
+            PrendaRepositorio prendas, ServicioRepositorio servicios, LavanderiaRepositorio lavanderia,
+            Clock reloj) {
         this.clientes = clientes;
         this.empleados = empleados;
         this.prendas = prendas;
         this.servicios = servicios;
+        this.lavanderia = lavanderia;
         this.reloj = reloj;
     }
 
@@ -89,7 +96,8 @@ public class NegocioAlquiler {
         EmpleadoRepositorio empleados = new EmpleadoRepositorioSqlite(conexion);
         PrendaRepositorio prendas = new PrendaRepositorioSqlite(conexion);
         ServicioRepositorio servicios = new ServicioRepositorioSqlite(conexion, clientes, empleados, prendas);
-        return new NegocioAlquiler(clientes, empleados, prendas, servicios, reloj);
+        LavanderiaRepositorio lavanderia = new LavanderiaRepositorioSqlite(conexion, prendas);
+        return new NegocioAlquiler(clientes, empleados, prendas, servicios, lavanderia, reloj);
     }
 
     /**
@@ -292,6 +300,50 @@ public class NegocioAlquiler {
      */
     public List<Empleado> listarEmpleados() throws AtuendosException {
         return empleados.listar();
+    }
+
+    /**
+     * Registra una prenda en la lista de lavandería, con o sin prioridad. Va
+     * con prioridad si está manchada, es delicada o el administrador lo
+     * considera necesario; si no, queda por orden de llegada.
+     *
+     * @param referencia referencia de la prenda
+     * @param prioritaria si se envía antes que las demás
+     * @return el registro creado
+     * @throws AtuendosException si la prenda no existe o ya está pendiente
+     */
+    public PrendaEnLavanderia registrarEnLavanderia(String referencia, boolean prioritaria)
+            throws AtuendosException {
+        String ref = obligatorio(Constantes.CAMPO_REFERENCIA, referencia);
+        Prenda prenda = prendas.buscar(ref).orElseThrow(
+                () -> new AtuendosException(String.format(Constantes.MSG_PRENDA_NO_REGISTRADA, ref)));
+        return lavanderia.registrar(prenda, prioritaria);
+    }
+
+    /**
+     * Lista las prendas pendientes de envío a lavandería, sin enviarlas.
+     *
+     * @return las prendas pendientes, en el orden de envío
+     * @throws AtuendosException si falla la base de datos
+     */
+    public List<PrendaEnLavanderia> listarLavanderiaPendiente() throws AtuendosException {
+        return lavanderia.pendientes();
+    }
+
+    /**
+     * Envía una tanda de prendas a lavandería: primero las prioritarias y
+     * luego por orden de llegada. Si hay menos de las pedidas, envía las que haya.
+     *
+     * @param cantidad cantidad de prendas que se pueden enviar hoy
+     * @return la notificación con la fecha y las prendas enviadas
+     * @throws AtuendosException si la cantidad no es positiva o falla la base de datos
+     */
+    public EnvioLavanderia enviarALavanderia(int cantidad) throws AtuendosException {
+        if (cantidad < 1) {
+            throw new AtuendosException(Constantes.MSG_CANTIDAD_INVALIDA);
+        }
+        LocalDate hoy = LocalDate.now(reloj);
+        return new EnvioLavanderia(hoy, lavanderia.enviar(cantidad, hoy));
     }
 
     private static String obligatorio(String campo, String valor) throws AtuendosException {
