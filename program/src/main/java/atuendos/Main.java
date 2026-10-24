@@ -26,15 +26,16 @@ public final class Main {
      * @param args argumentos de línea de comandos (no se usan)
      */
     public static void main(String[] args) {
-        Terminal terminal = Terminal.estandar();
         int codigo = 0;
-        try {
-            new Menu(terminal, NegocioAlquiler.crear()).ejecutar();
-        } catch (AtuendosException e) {
-            terminal.error(e.getMessage());
-            codigo = 1;
-        } finally {
-            Conexion.cerrarInstancia();
+        try (Terminal terminal = Terminal.estandar()) {
+            try {
+                new Menu(terminal, NegocioAlquiler.crear()).ejecutar();
+            } catch (AtuendosException e) {
+                terminal.error(e.getMessage());
+                codigo = 1;
+            } finally {
+                Conexion.cerrarInstancia();
+            }
         }
         if (codigo != 0) {
             System.exit(codigo);

@@ -80,6 +80,18 @@ class TerminalTest {
     }
 
     @Test
+    void elegirVariasAceptaNumerosSeparadosPorComa() {
+        assertEquals(List.of(0, 2), terminal("3, 1\n").elegirVarias("Tallas", List.of("XS", "S", "M"), 1));
+    }
+
+    @Test
+    void elegirVariasRepiteSiNoCumpleElMinimoOHayErrores() {
+        assertEquals(List.of(1), terminal("\n9\nx\n2\n").elegirVarias("Tallas", List.of("XS", "S", "M"), 1));
+        assertTrue(salida().contains("Elige al menos 1"));
+        assertTrue(salida().contains("Opción no válida"));
+    }
+
+    @Test
     void elegirEnumDevuelveElValor() {
         assertEquals(Altura.CORTO, terminal("2\n").elegirEnum("Altura", Altura.class));
     }

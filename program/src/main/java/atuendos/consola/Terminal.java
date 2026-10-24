@@ -6,6 +6,7 @@
  */
 package atuendos.consola;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -13,15 +14,27 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.TreeSet;
+
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.NonBlockingReader;
 
 /**
- * Entrada y salida de la interfaz de texto. Dibuja con colores y marcos
- * Unicode cuando la terminal los admite, y con texto plano en los demás casos.
+ * Entrada y salida de la interfaz de texto. En una terminal real dibuja con
+ * colores y marcos Unicode, edita las líneas de texto y deja elegir con las
+ * flechas; con la entrada redirigida usa texto plano y opciones numeradas.
  */
-public class Terminal {
+public class Terminal implements AutoCloseable {
 
     private static final String RESET = "\u001B[0m";
     private static final String NEGRITA = "\u001B[1m";
@@ -39,10 +52,22 @@ public class Terminal {
     private static final String MSG_FECHA = "Fecha no válida. Formato esperado: dd/mm/aaaa.";
     private static final String MSG_SI_NO = "Se esperaba s o n.";
     private static final String MSG_OPCION = "Opción no válida.";
+    private static final String MSG_SELECCION_MINIMA = "Elige al menos %d.";
+    private static final String AYUDA_UNA = "↑↓ mover · enter elegir";
+    private static final String AYUDA_VARIAS = "↑↓ mover · espacio marcar · enter confirmar";
+    private static final String AYUDA_UNA_PLANA = "arriba/abajo mover, enter elegir";
+    private static final String AYUDA_VARIAS_PLANA = "arriba/abajo mover, espacio marcar, enter confirmar";
+    private static final int ESPERA_TECLA_MS = 100;
+
+    private enum Tecla {
+        ARRIBA, ABAJO, ESPACIO, ENTER, OTRA
+    }
 
     private final Scanner entrada;
     private final PrintStream salida;
     private final boolean ansi;
+    private final org.jline.terminal.Terminal jline;
+    private final LineReader lector;
 
     /**
      * Crea una terminal sobre los flujos dados.
@@ -55,19 +80,60 @@ public class Terminal {
         this.entrada = new Scanner(entrada, StandardCharsets.UTF_8);
         this.salida = salida;
         this.ansi = ansi;
+        this.jline = null;
+        this.lector = null;
     }
 
     /**
-     * Crea la terminal estándar, con colores solo si hay una terminal real y
-     * el usuario no pidió desactivarlos con NO_COLOR.
+     * Crea una terminal interactiva sobre una terminal de JLine.
+     *
+     * @param jline terminal de JLine, en modo crudo para las elecciones
+     * @param salida flujo de escritura
+     * @param ansi si se usan colores y marcos Unicode
+     */
+    Terminal(org.jline.terminal.Terminal jline, PrintStream salida, boolean ansi) {
+        this.entrada = null;
+        this.salida = salida;
+        this.ansi = ansi;
+        this.jline = jline;
+        this.lector = LineReaderBuilder.builder().terminal(jline).build();
+    }
+
+    /**
+     * Crea la terminal estándar. Con una terminal real es interactiva, y los
+     * colores se desactivan si el usuario define NO_COLOR; con la entrada
+     * redirigida usa texto plano.
      *
      * @return la terminal estándar
      */
     public static Terminal estandar() {
-        boolean color = System.console() != null
-                && System.getenv("NO_COLOR") == null
-                && !"dumb".equals(System.getenv("TERM"));
-        return new Terminal(System.in, System.out, color);
+        boolean real = System.console() != null && !"dumb".equals(System.getenv("TERM"));
+        if (real) {
+            try {
+                org.jline.terminal.Terminal jline = TerminalBuilder.builder().system(true).build();
+                if (!jline.getType().startsWith(org.jline.terminal.Terminal.TYPE_DUMB)) {
+                    return new Terminal(jline, System.out, System.getenv("NO_COLOR") == null);
+                }
+                jline.close();
+            } catch (IOException | RuntimeException e) {
+                // Sin terminal interactiva se usa el modo de texto.
+            }
+        }
+        return new Terminal(System.in, System.out, false);
+    }
+
+    /**
+     * Libera la terminal interactiva y devuelve la terminal a su estado normal.
+     */
+    @Override
+    public void close() {
+        if (jline != null) {
+            try {
+                jline.close();
+            } catch (IOException e) {
+                // Al cerrar no hay nada más que hacer con la terminal.
+            }
+        }
     }
 
     /**
@@ -205,9 +271,17 @@ public class Terminal {
      * @return el texto sin espacios en los extremos
      */
     public String leer(String etiqueta) {
-        salida.print("  " + estilo(NEGRITA, etiqueta) + estilo(CIAN, " › "));
-        salida.flush();
-        return entrada.nextLine().trim();
+        String indicador = "  " + estilo(NEGRITA, etiqueta) + estilo(CIAN, " › ");
+        if (lector == null) {
+            salida.print(indicador);
+            salida.flush();
+            return entrada.nextLine().trim();
+        }
+        try {
+            return lector.readLine(indicador).trim();
+        } catch (EndOfFileException | UserInterruptException e) {
+            throw new NoSuchElementException();
+        }
     }
 
     /**
@@ -310,6 +384,9 @@ public class Terminal {
      * @return el índice elegido, desde cero
      */
     public int elegir(String titulo, List<String> opciones) {
+        if (jline != null) {
+            return seleccionar(titulo, opciones, false, 1).get(0);
+        }
         linea(estilo(NEGRITA, titulo));
         for (int i = 0; i < opciones.size(); i++) {
             opcion(String.valueOf(i + 1), opciones.get(i));
@@ -328,6 +405,48 @@ public class Terminal {
     }
 
     /**
+     * Pide elegir una o varias opciones de una lista. En una terminal real se
+     * mueve con las flechas y se marca con la barra espaciadora; en texto plano
+     * se escriben los números separados por coma.
+     *
+     * @param titulo texto sobre la lista
+     * @param opciones textos de las opciones
+     * @param minimo cantidad mínima de opciones a elegir
+     * @return los índices elegidos, desde cero y en orden
+     */
+    public List<Integer> elegirVarias(String titulo, List<String> opciones, int minimo) {
+        if (jline != null) {
+            return seleccionar(titulo, opciones, true, minimo);
+        }
+        linea(estilo(NEGRITA, titulo));
+        for (int i = 0; i < opciones.size(); i++) {
+            opcion(String.valueOf(i + 1), opciones.get(i));
+        }
+        while (true) {
+            String texto = leer("Números separados por coma");
+            try {
+                TreeSet<Integer> elegidas = new TreeSet<>();
+                for (String parte : texto.split("[,\\s]+")) {
+                    if (parte.isBlank()) {
+                        continue;
+                    }
+                    int numero = Integer.parseInt(parte);
+                    if (numero < 1 || numero > opciones.size()) {
+                        throw new NumberFormatException();
+                    }
+                    elegidas.add(numero - 1);
+                }
+                if (elegidas.size() >= minimo) {
+                    return new ArrayList<>(elegidas);
+                }
+                error(String.format(MSG_SELECCION_MINIMA, minimo));
+            } catch (NumberFormatException e) {
+                error(MSG_OPCION);
+            }
+        }
+    }
+
+    /**
      * Pide elegir un valor de una enumeración.
      *
      * @param titulo texto sobre la lista
@@ -339,6 +458,107 @@ public class Terminal {
         E[] valores = clase.getEnumConstants();
         List<String> nombres = java.util.Arrays.stream(valores).map(Terminal::etiqueta).toList();
         return valores[elegir(titulo, nombres)];
+    }
+
+    private List<Integer> seleccionar(String titulo, List<String> opciones, boolean varias, int minimo) {
+        int cantidad = opciones.size();
+        boolean[] marcadas = new boolean[cantidad];
+        int cursor = 0;
+        String aviso = null;
+        Attributes anterior = jline.enterRawMode();
+        try {
+            NonBlockingReader teclas = jline.reader();
+            dibujar(titulo, opciones, varias, marcadas, cursor, aviso, false);
+            while (true) {
+                Tecla tecla = leerTecla(teclas);
+                aviso = null;
+                if (tecla == Tecla.ARRIBA) {
+                    cursor = (cursor + cantidad - 1) % cantidad;
+                } else if (tecla == Tecla.ABAJO) {
+                    cursor = (cursor + 1) % cantidad;
+                } else if (tecla == Tecla.ESPACIO && varias) {
+                    marcadas[cursor] = !marcadas[cursor];
+                } else if (tecla == Tecla.ENTER) {
+                    if (!varias) {
+                        marcadas[cursor] = true;
+                    }
+                    List<Integer> elegidas = indices(marcadas);
+                    if (elegidas.size() >= minimo) {
+                        resumir(titulo, opciones, elegidas);
+                        return elegidas;
+                    }
+                    aviso = String.format(MSG_SELECCION_MINIMA, minimo);
+                }
+                dibujar(titulo, opciones, varias, marcadas, cursor, aviso, true);
+            }
+        } catch (IOException e) {
+            throw new NoSuchElementException();
+        } finally {
+            jline.setAttributes(anterior);
+        }
+    }
+
+    private static Tecla leerTecla(NonBlockingReader teclas) throws IOException {
+        int c = teclas.read();
+        if (c == NonBlockingReader.EOF || c == 3 || c == 4) {
+            throw new NoSuchElementException();
+        }
+        if (c == 27) {
+            int segundo = teclas.read(ESPERA_TECLA_MS);
+            if (segundo == '[' || segundo == 'O') {
+                int tercero = teclas.read(ESPERA_TECLA_MS);
+                return tercero == 'A' ? Tecla.ARRIBA : tercero == 'B' ? Tecla.ABAJO : Tecla.OTRA;
+            }
+            return Tecla.OTRA;
+        }
+        return switch (c) {
+            case 'k' -> Tecla.ARRIBA;
+            case 'j' -> Tecla.ABAJO;
+            case ' ' -> Tecla.ESPACIO;
+            case '\r', '\n' -> Tecla.ENTER;
+            default -> Tecla.OTRA;
+        };
+    }
+
+    private void dibujar(String titulo, List<String> opciones, boolean varias, boolean[] marcadas, int cursor,
+            String aviso, boolean redibujar) {
+        StringBuilder pantalla = new StringBuilder();
+        if (redibujar) {
+            pantalla.append("\u001B[").append(opciones.size() + 2).append('A');
+        }
+        pantalla.append("\r\u001B[2K  ").append(estilo(NEGRITA, titulo)).append('\n');
+        for (int i = 0; i < opciones.size(); i++) {
+            boolean actual = i == cursor;
+            String texto = (actual ? (ansi ? "❯" : ">") : " ") + " " + (varias ? (marcadas[i] ? "[*] " : "[ ] ") : "")
+                    + opciones.get(i);
+            String estilo = actual ? NEGRITA + CIAN : varias && marcadas[i] ? VERDE : "";
+            pantalla.append("\r\u001B[2K  ").append(estilo.isEmpty() ? texto : estilo(estilo, texto)).append('\n');
+        }
+        String ayuda = ansi ? (varias ? AYUDA_VARIAS : AYUDA_UNA) : (varias ? AYUDA_VARIAS_PLANA : AYUDA_UNA_PLANA);
+        pantalla.append("\r\u001B[2K  ").append(aviso != null ? estilo(ROJO, aviso) : estilo(TENUE, ayuda))
+                .append('\n');
+        salida.print(pantalla);
+        salida.flush();
+    }
+
+    private void resumir(String titulo, List<String> opciones, List<Integer> elegidas) {
+        salida.print("\u001B[" + (opciones.size() + 2) + "A\r\u001B[J");
+        List<String> textos = new ArrayList<>();
+        for (int indice : elegidas) {
+            textos.add(opciones.get(indice));
+        }
+        linea(estilo(TENUE, titulo) + "  " + String.join(", ", textos));
+        salida.flush();
+    }
+
+    private static List<Integer> indices(boolean[] marcadas) {
+        List<Integer> elegidas = new ArrayList<>();
+        for (int i = 0; i < marcadas.length; i++) {
+            if (marcadas[i]) {
+                elegidas.add(i);
+            }
+        }
+        return elegidas;
     }
 
     private static String etiqueta(Enum<?> valor) {
