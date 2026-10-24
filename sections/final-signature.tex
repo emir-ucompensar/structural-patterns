@@ -1,22 +1,57 @@
 % SPDX-License-Identifier: MIT
 %
-% final-signature.tex - Add a non-invasive mark to the last page footer.
+% final-signature.tex - Stamp a fixed mark on the bottom of the last page.
 %
-% The mark lives in the footer layer rather than the document body. This avoids
-% adding paragraphs, vertical glue, or page breaks while keeping the signature
-% anchored exactly 1.0cm from the bottom edge of the final shipped page.
+% The mark is drawn by the LaTeX shipout hook, on top of the finished page box.
+% It is therefore independent of the page style (fancyhdr, plain, empty), of
+% the body flow, of floats, and of packages such as tikz, lastpage or hyperref.
+% It adds no paragraphs, glue or page breaks, and it sits 1.0cm above the
+% bottom edge of the physical page, centered horizontally.
+%
+% Last page detection: every shipped page records its physical page number in
+% the .aux file (\sigLastPage), and the mark is drawn on the page whose number
+% equals the value recorded by the previous run. The value is therefore settled
+% after the usual two or three passes; compile.sh already runs three. The
+% physical counter is used, so roman/arabic numbering and appendices do not
+% affect it.
+%
+% Only main.tex should load this file, once, anywhere before \end{document}.
 
-\fancyfoot[C]{%
-  \ifnum\value{page}=\getpagerefnumber{LastPage}\relax
-    \begin{tikzpicture}[remember picture, overlay]
-      \node[anchor=south] at ([yshift=1.0cm]current page.south) {
-        \footnotesize
-        \begin{tabular}{c}
-          \textbf{TECHNOLOGY IS ELEGANT}\\
-          Emir A.\\
-          \institution
-        \end{tabular}
-      };
-    \end{tikzpicture}%
-  \fi
-}
+\makeatletter
+
+% Physical number of the last page, refreshed by each run through the .aux.
+\providecommand{\sigLastPage}{0}
+
+% Record the physical page number of every shipped page. The last write wins.
+\AddToHook{shipout/after}{%
+  \immediate\write\@auxout{%
+    \string\gdef\string\sigLastPage{\the\ReadonlyShipoutCounter}}}
+
+% Draw the mark, in the shipout foreground, only on the last page.
+\AddToHook{shipout/foreground}{%
+  \ifnum\ReadonlyShipoutCounter=\sigLastPage\relax
+    \unitlength=1sp
+    \put(\number\dimexpr.5\pdfpagewidth\relax,%
+         \number\dimexpr-\pdfpageheight+1.0cm\relax){%
+      \makebox(0,0)[b]{%
+        \begingroup
+          % Line spacing: the document's 1.5 stretch reduced by 25% (1.125).
+          \renewcommand{\baselinestretch}{1.125}%
+          \normalfont\footnotesize\normalcolor
+          \begin{tabular}[b]{@{}c@{}}
+            \textbf{TECHNOLOGY IS ELEGANT}\\
+            Emir A.%
+            \ifdefined\institution\ifx\institution\empty\else\\\institution\fi\fi
+          \end{tabular}%
+        \endgroup}}%
+  \fi}
+
+% If the page count changed since the previous run the mark was drawn from a
+% stale value. Say so with the standard rerun warning, which both latexmk and
+% compile.sh act on.
+\AddToHook{enddocument/afterlastpage}{%
+  \ifnum\ReadonlyShipoutCounter=\sigLastPage\relax\else
+    \@latex@warning@no@line{Rerun to get the final signature on the last page}%
+  \fi}
+
+\makeatother

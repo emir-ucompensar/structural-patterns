@@ -5,4 +5,28 @@
 % Use this section to connect the research question with established theory and
 % prior studies.
 
-% Placeholder for theoretical framework content
+\subsection{Patrones de diseño}
+
+En la literatura que revisé, los patrones de diseño del catálogo Gang of Four (GoF) se agrupan en patrones de creación, que gestionan cómo se crean los objetos con flexibilidad y reutilización, patrones estructurales, que gestionan cómo se componen clases y objetos, y patrones de comportamiento, que regulan la interacción entre objetos \incitep{2025-varma-design-patterns-java}.
+
+Un patrón es una solución reutilizable y documentada para un problema común de diseño, y la evidencia sobre su efecto en la calidad se reparte. Lo más curioso es cómo un mismo patrón sale beneficioso en unos estudios y perjudicial en otros, algo que encontré una y otra vez al leer. De los 23 patrones, 18 aparecen con efecto positivo en la mantenibilidad, y la comprensibilidad es el atributo más esquivo. Cada patrón es una compensación que depende del contexto, y la complejidad que se agrega sin necesitar la flexibilidad correspondiente deteriora la calidad \incitep{2013-ampatzoglou-gof-design-patterns-mapping-study}.
+
+\subsection{Patrones de creación}
+
+Para los patrones de creación me apoyé en la revisión de \incitet{2025-neelan-creational-design-patterns}, que los muestra como separación entre el sistema y los detalles de instanciación de las clases, lo que favorece el acoplamiento bajo y la mantenibilidad. Singleton garantiza una única instancia de una clase, Factory Method define una interfaz para crear objetos y deja que las subclases decidan la clase concreta, y Abstract Factory agrupa fábricas de familias de objetos relacionados. Builder separa la construcción de un objeto complejo de su representación final, y Prototype crea objetos clonando una instancia existente.
+
+Me llamó la atención el estudio de \incitet{2026-abufakher-gof-design-patterns-quality} sobre diez proyectos Java de código abierto. Allí Factory Method mostró métricas dentro de los rangos óptimos. Singleton registró baja cohesión, y Prototype superó el umbral de la métrica de respuesta de la clase. Según el estudio, ambos piden un diseño cuidadoso, con clases cohesivas.
+
+\subsection{Patrones estructurales}
+
+Los patrones estructurales explican cómo ensamblar objetos y clases en estructuras más grandes, y mantenerlas flexibles y eficientes. La familia reúne siete patrones: Adapter, Bridge, Composite, Decorator, Facade, Flyweight y Proxy.
+
+Adapter permite que objetos con interfaces incompatibles colaboren, se aplica sobre código existente, y suele envolver un solo objeto. Bridge separa una abstracción de su implementación, en dos jerarquías que evolucionan por separado, y sustituye la herencia por composición cuando una clase crece en dos dimensiones independientes. Composite organiza objetos en estructuras de árbol, y permite tratar los objetos individuales y los compuestos de la misma manera. Decorator añade responsabilidades a un objeto al envolverlo en otros objetos que contienen esas funciones.
+
+Facade ofrece una interfaz unificada para un conjunto de interfaces de un subsistema, y funciona como código pegamento que oculta los componentes de interés especializado. Recibe la solicitud de otro objeto y la delega en los objetos adecuados del subsistema, sin que el usuario lo note. Para Facade me apoyé en la encuesta de \incitet{2012-zhang-follow-on-survey-patterns-controversial}. Los desarrolladores con experiencia lo valoran para integrar código heredado y para ofrecer una buena abstracción, y señalan que se usa mal o se diseña mal con facilidad, y que puede volverse difícil de mantener.
+
+En el mismo estudio de \incitet{2026-abufakher-gof-design-patterns-quality}, Adapter y Decorator mostraron métricas dentro de los rangos óptimos, y Composite superó el umbral de la métrica de respuesta de la clase, algo que se atribuye a colecciones de objetos que responden a una misma acción.
+
+\subsection{Relaciones entre patrones}
+
+La verdad es que los patrones rara vez trabajan solos. Facade define una interfaz nueva para un subsistema, Adapter adapta una interfaz existente, y la fachada suele implementarse como Singleton, porque normalmente basta con un único objeto. Bridge puede combinarse con Abstract Factory y con Builder, que crean las implementaciones concretas que el puente conecta. Facade y Singleton se prestan al mal uso, y las consecuencias de ese mal uso son especialmente significativas, según la misma encuesta.

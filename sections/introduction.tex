@@ -5,4 +5,20 @@
 % Establish the motivation, scope, and direction of the paper before moving into
 % theory, methods, and results.
 
-% Placeholder for introduction content
+``Los Atuendos'' alquila vestidos para dama, trajes para caballero y disfraces, y necesita un software que administre sus prendas, clientes, empleados y servicios de alquiler.
+
+Los patrones de diseño reducen el acoplamiento, y mejoran la reutilización, la legibilidad, la mantenibilidad y la escalabilidad. El catálogo Gang of Four reúne 23, en tres grupos: creación, estructurales y de comportamiento \incitep{2025-varma-design-patterns-java}.
+
+Cada prenda se registra con referencia, color, marca, talla y valor del alquiler. La prenda de dama agrega pedrería, largo y cantidad de piezas, la de caballero agrega tipo de traje y de corbata, y el disfraz agrega su nombre. Pues si cada tipo trae datos propios, el diseño tiene que admitir tipos nuevos sin reescribir lo que ya funciona.
+
+Un servicio de alquiler reúne un cliente, un empleado, una o varias prendas, una fecha de solicitud y una fecha de alquiler. El software verifica la disponibilidad de cada prenda para la fecha pedida, y permite consultar los servicios por número, por cliente y por fecha.
+
+El mal uso de los patrones y la aparición de antipatrones figuran entre los retos que recoge la literatura de 2018 a 2024 \incitep{2025-chippagiri-software-design-patterns}. Cada patrón del diseño responde a una necesidad concreta del caso.
+
+Para escribir este documento revisé seis fuentes sobre patrones de diseño, y la ficha de cada una quedó documentada en el repositorio del proyecto.
+
+Las prendas que necesitan lavado se registran en una lista de envío, con prioridad si están manchadas, si son delicadas o si el administrador lo considera necesario. Salen hacia la lavandería por tandas, según la disponibilidad del día.
+
+La información se guarda en una base de datos relacional SQLite, sencilla y suficiente para el alcance del caso. Escribo la aplicación en Java con VSCodium, y uso Claude Code como apoyo para revisar y generar código. Los archivos Java son de mi autoría, y cada uno lleva un comentario que indica la asistencia de herramientas de inteligencia artificial en la creación de partes del código que pueden ser complejas o repetitivas.
+
+Para esta investigación seleccioné los patrones de creación y estructurales que flexibilizan el diseño de ``Los Atuendos'', y dejo por escrito por qué elegí cada uno. Incluyo el diagrama de clases con los patrones incorporados, y un diagrama de secuencia por cada patrón. La implementación en Java se prueba contra cada funcionalidad solicitada.
