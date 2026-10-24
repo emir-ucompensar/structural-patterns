@@ -106,6 +106,18 @@ public final class Constantes {
     /** Mensaje cuando no existe un servicio con ese número; recibe el número. */
     public static final String MSG_SERVICIO_NO_EXISTE = "No existe un servicio con el número %d.";
 
+    /** Mensaje cuando la prenda ya espera envío a lavandería; recibe la referencia. */
+    public static final String MSG_YA_EN_LAVANDERIA = "La prenda %s ya está en la lista de lavandería.";
+
+    /** Mensaje cuando la cantidad a enviar no es positiva. */
+    public static final String MSG_CANTIDAD_INVALIDA = "La cantidad a enviar debe ser mayor que cero.";
+
+    /** Mensaje cuando un registro de lavandería apunta a una prenda que no existe; recibe la referencia. */
+    public static final String MSG_LAVANDERIA_INCONSISTENTE = "El registro de lavandería de la prenda %s es inconsistente.";
+
+    /** Nombre del campo de cantidad, usado en mensajes. */
+    public static final String CAMPO_CANTIDAD = "cantidad";
+
     private Constantes() {
     }
 }
