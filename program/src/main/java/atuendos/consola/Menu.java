@@ -18,6 +18,7 @@ import atuendos.modelo.ServicioAlquiler;
 import atuendos.modelo.TipoPrenda;
 import atuendos.modelo.TipoTraje;
 import atuendos.negocio.NegocioAlquiler;
+import atuendos.negocio.ServiciosDeCliente;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  * Menú principal de la aplicación. Lee los datos, llama a la fachada y
@@ -38,6 +40,13 @@ public class Menu {
     private static final String MSG_INESPERADO = "Ocurrió un error inesperado. La operación no se completó.";
     private static final String MSG_OPCION_NO_VALIDA = "Opción no válida.";
     private static final String MSG_DESPEDIDA = "Hasta pronto.";
+    private static final String MSG_SIN_SERVICIOS = "No hay servicios para mostrar.";
+    private static final String MSG_SIN_PRENDAS = "No hay prendas para mostrar.";
+
+    private static final String[] CABECERA_SERVICIOS = {"Número", "Solicitud", "Alquiler", "Cliente",
+        "Empleado", "Prendas"};
+    private static final String[] CABECERA_PRENDAS = {"Referencia", "Tipo", "Color", "Marca", "Talla",
+        "Alquiler", "Detalle"};
 
     /** Acción de una opción del menú. */
     @FunctionalInterface
@@ -48,9 +57,12 @@ public class Menu {
     private record Opcion(String texto, Accion accion) {
     }
 
+    private record Grupo(String titulo, List<Opcion> opciones) {
+    }
+
     private final Terminal terminal;
     private final NegocioAlquiler negocio;
-    private final List<Opcion> opciones;
+    private final List<Grupo> grupos;
 
     /**
      * Crea el menú sobre una terminal y la fachada de negocio.
@@ -61,11 +73,21 @@ public class Menu {
     public Menu(Terminal terminal, NegocioAlquiler negocio) {
         this.terminal = terminal;
         this.negocio = negocio;
-        this.opciones = List.of(
-                new Opcion("Registrar prenda", this::registrarPrenda),
-                new Opcion("Registrar cliente", this::registrarCliente),
-                new Opcion("Registrar empleado", this::registrarEmpleado),
-                new Opcion("Registrar servicio de alquiler", this::registrarServicio));
+        this.grupos = List.of(
+                new Grupo("Registros", List.of(
+                        new Opcion("Registrar prenda", this::registrarPrenda),
+                        new Opcion("Registrar cliente", this::registrarCliente),
+                        new Opcion("Registrar empleado", this::registrarEmpleado))),
+                new Grupo("Servicios de alquiler", List.of(
+                        new Opcion("Registrar servicio de alquiler", this::registrarServicio),
+                        new Opcion("Consultar servicio por número", this::consultarServicio),
+                        new Opcion("Consultar servicios de un cliente", this::consultarServiciosDeCliente),
+                        new Opcion("Consultar servicios por fecha", this::consultarServiciosPorFecha))),
+                new Grupo("Listados y consultas", List.of(
+                        new Opcion("Consultar prendas por talla", this::consultarPrendasPorTalla),
+                        new Opcion("Listar prendas", this::listarPrendas),
+                        new Opcion("Listar clientes", this::listarClientes),
+                        new Opcion("Listar empleados", this::listarEmpleados))));
     }
 
     /**
@@ -76,24 +98,41 @@ public class Menu {
         try {
             while (true) {
                 terminal.seccion("Menú principal");
-                for (int i = 0; i < opciones.size(); i++) {
-                    terminal.opcion(String.valueOf(i + 1), opciones.get(i).texto());
+                for (int i = 0; i < grupos.size(); i++) {
+                    terminal.opcion(String.valueOf(i + 1), grupos.get(i).titulo());
                 }
                 terminal.opcion("0", "Salir");
                 int eleccion = leerOpcion();
                 if (eleccion == 0) {
                     break;
                 }
-                if (eleccion < 0 || eleccion > opciones.size()) {
+                if (eleccion < 0 || eleccion > grupos.size()) {
                     terminal.error(MSG_OPCION_NO_VALIDA);
                     continue;
                 }
-                ejecutarAccion(opciones.get(eleccion - 1).accion());
+                atenderGrupo(grupos.get(eleccion - 1));
             }
         } catch (NoSuchElementException e) {
             terminal.linea("");
         }
         terminal.info(MSG_DESPEDIDA);
+    }
+
+    private void atenderGrupo(Grupo grupo) {
+        terminal.seccion(grupo.titulo());
+        for (int i = 0; i < grupo.opciones().size(); i++) {
+            terminal.opcion(String.valueOf(i + 1), grupo.opciones().get(i).texto());
+        }
+        terminal.opcion("0", "Volver");
+        int eleccion = leerOpcion();
+        if (eleccion == 0) {
+            return;
+        }
+        if (eleccion < 0 || eleccion > grupo.opciones().size()) {
+            terminal.error(MSG_OPCION_NO_VALIDA);
+            return;
+        }
+        ejecutarAccion(grupo.opciones().get(eleccion - 1).accion());
     }
 
     private int leerOpcion() {
@@ -143,14 +182,7 @@ public class Menu {
         Prenda prenda = negocio.registrarPrenda(
                 new DatosPrenda(tipo, referencia, color, marca, talla, valor, especificos));
         terminal.exito("Prenda registrada.");
-        terminal.ficha("Prenda", List.of(
-                new String[] {"Referencia", prenda.getReferencia()},
-                new String[] {"Tipo", prenda.getTipo().name()},
-                new String[] {"Color", prenda.getColor()},
-                new String[] {"Marca", prenda.getMarca()},
-                new String[] {"Talla", prenda.getTalla()},
-                new String[] {"Alquiler", Terminal.moneda(prenda.getValorAlquiler())},
-                new String[] {"Detalle", prenda.detalle()}));
+        fichaPrenda(prenda);
     }
 
     private void registrarCliente() throws AtuendosException {
@@ -162,12 +194,7 @@ public class Menu {
                 terminal.leerObligatorio("Teléfono"),
                 terminal.leerObligatorio("Correo"));
         terminal.exito("Cliente registrado.");
-        terminal.ficha("Cliente", List.of(
-                new String[] {"Identificación", cliente.getIdentificacion()},
-                new String[] {"Nombre", cliente.getNombre()},
-                new String[] {"Dirección", cliente.getDireccion()},
-                new String[] {"Teléfono", cliente.getTelefono()},
-                new String[] {"Correo", cliente.getCorreo()}));
+        fichaCliente(cliente);
     }
 
     private void registrarEmpleado() throws AtuendosException {
@@ -179,12 +206,7 @@ public class Menu {
                 terminal.leerObligatorio("Teléfono"),
                 terminal.leerObligatorio("Cargo"));
         terminal.exito("Empleado registrado.");
-        terminal.ficha("Empleado", List.of(
-                new String[] {"Identificación", empleado.getIdentificacion()},
-                new String[] {"Nombre", empleado.getNombre()},
-                new String[] {"Dirección", empleado.getDireccion()},
-                new String[] {"Teléfono", empleado.getTelefono()},
-                new String[] {"Cargo", empleado.getCargo()}));
+        fichaEmpleado(empleado);
     }
 
     private void registrarServicio() throws AtuendosException {
@@ -203,18 +225,166 @@ public class Menu {
         }
         ServicioAlquiler servicio = negocio.registrarServicio(clienteId, empleadoId, referencias, fecha);
         terminal.exito("Servicio de alquiler registrado.");
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern(Constantes.FORMATO_FECHA);
+        fichaServicio(servicio);
+    }
+
+    private void consultarServicio() throws AtuendosException {
+        terminal.seccion("Consultar servicio por número");
+        fichaServicio(negocio.consultarServicio(terminal.leerEntero("Número del servicio")));
+    }
+
+    private void consultarServiciosDeCliente() throws AtuendosException {
+        terminal.seccion("Consultar servicios de un cliente");
+        ServiciosDeCliente resultado = negocio.consultarServiciosDeCliente(
+                terminal.leerObligatorio("Identificación del cliente"));
+        fichaCliente(resultado.cliente());
+        terminal.seccion("Servicios vigentes");
+        mostrarServicios(resultado.vigentes());
+    }
+
+    private void consultarServiciosPorFecha() throws AtuendosException {
+        terminal.seccion("Consultar servicios por fecha");
+        LocalDate fecha = terminal.leerFecha("Fecha de alquiler (dd/mm/aaaa)");
+        terminal.seccion("Servicios del " + fecha.format(DateTimeFormatter.ofPattern(Constantes.FORMATO_FECHA)));
+        mostrarServicios(negocio.consultarServiciosPorFecha(fecha));
+    }
+
+    private void consultarPrendasPorTalla() throws AtuendosException {
+        terminal.seccion("Consultar prendas por talla");
+        String talla = terminal.leerObligatorio("Talla");
+        Map<TipoPrenda, List<Prenda>> porTipo = negocio.consultarPrendasPorTalla(talla);
+        for (Map.Entry<TipoPrenda, List<Prenda>> entrada : porTipo.entrySet()) {
+            terminal.seccion(titulo(entrada.getKey()) + " - talla " + talla);
+            if (entrada.getValue().isEmpty()) {
+                terminal.linea("Sin prendas.");
+            } else {
+                mostrarPrendas(entrada.getValue());
+            }
+        }
+    }
+
+    private void listarPrendas() throws AtuendosException {
+        terminal.seccion("Prendas registradas");
+        List<Prenda> prendas = negocio.listarPrendas();
+        if (prendas.isEmpty()) {
+            terminal.info(MSG_SIN_PRENDAS);
+        } else {
+            mostrarPrendas(prendas);
+        }
+    }
+
+    private void listarClientes() throws AtuendosException {
+        terminal.seccion("Clientes registrados");
+        List<String[]> filas = new ArrayList<>();
+        for (Cliente cliente : negocio.listarClientes()) {
+            filas.add(new String[] {cliente.getIdentificacion(), cliente.getNombre(), cliente.getDireccion(),
+                cliente.getTelefono(), cliente.getCorreo()});
+        }
+        mostrarPersonas(new String[] {"Identificación", "Nombre", "Dirección", "Teléfono", "Correo"}, filas);
+    }
+
+    private void listarEmpleados() throws AtuendosException {
+        terminal.seccion("Empleados registrados");
+        List<String[]> filas = new ArrayList<>();
+        for (Empleado empleado : negocio.listarEmpleados()) {
+            filas.add(new String[] {empleado.getIdentificacion(), empleado.getNombre(), empleado.getDireccion(),
+                empleado.getTelefono(), empleado.getCargo()});
+        }
+        mostrarPersonas(new String[] {"Identificación", "Nombre", "Dirección", "Teléfono", "Cargo"}, filas);
+    }
+
+    private void mostrarPersonas(String[] cabeceras, List<String[]> filas) {
+        if (filas.isEmpty()) {
+            terminal.info("No hay registros para mostrar.");
+        } else {
+            terminal.tabla(cabeceras, filas);
+        }
+    }
+
+    private void mostrarServicios(List<ServicioAlquiler> servicios) {
+        if (servicios.isEmpty()) {
+            terminal.info(MSG_SIN_SERVICIOS);
+            return;
+        }
+        List<String[]> filas = new ArrayList<>();
+        for (ServicioAlquiler servicio : servicios) {
+            filas.add(new String[] {
+                String.valueOf(servicio.getNumero()),
+                formatear(servicio.getFechaSolicitud()),
+                formatear(servicio.getFechaAlquiler()),
+                servicio.getCliente().getNombre(),
+                servicio.getEmpleado().getNombre(),
+                servicio.getPrendas().stream().map(Prenda::getReferencia).collect(Collectors.joining(", "))});
+        }
+        terminal.tabla(CABECERA_SERVICIOS, filas);
+    }
+
+    private void mostrarPrendas(List<Prenda> prendas) {
+        List<String[]> filas = new ArrayList<>();
+        for (Prenda prenda : prendas) {
+            filas.add(new String[] {prenda.getReferencia(), prenda.getTipo().name(), prenda.getColor(),
+                prenda.getMarca(), prenda.getTalla(), Terminal.moneda(prenda.getValorAlquiler()),
+                prenda.detalle()});
+        }
+        terminal.tabla(CABECERA_PRENDAS, filas);
+    }
+
+    private void fichaPrenda(Prenda prenda) {
+        terminal.ficha("Prenda", List.of(
+                new String[] {"Referencia", prenda.getReferencia()},
+                new String[] {"Tipo", prenda.getTipo().name()},
+                new String[] {"Color", prenda.getColor()},
+                new String[] {"Marca", prenda.getMarca()},
+                new String[] {"Talla", prenda.getTalla()},
+                new String[] {"Alquiler", Terminal.moneda(prenda.getValorAlquiler())},
+                new String[] {"Detalle", prenda.detalle()}));
+    }
+
+    private void fichaCliente(Cliente cliente) {
+        terminal.ficha("Cliente", List.of(
+                new String[] {"Identificación", cliente.getIdentificacion()},
+                new String[] {"Nombre", cliente.getNombre()},
+                new String[] {"Dirección", cliente.getDireccion()},
+                new String[] {"Teléfono", cliente.getTelefono()},
+                new String[] {"Correo", cliente.getCorreo()}));
+    }
+
+    private void fichaEmpleado(Empleado empleado) {
+        terminal.ficha("Empleado", List.of(
+                new String[] {"Identificación", empleado.getIdentificacion()},
+                new String[] {"Nombre", empleado.getNombre()},
+                new String[] {"Dirección", empleado.getDireccion()},
+                new String[] {"Teléfono", empleado.getTelefono()},
+                new String[] {"Cargo", empleado.getCargo()}));
+    }
+
+    private void fichaServicio(ServicioAlquiler servicio) {
         List<String[]> filas = new ArrayList<>();
         filas.add(new String[] {"Número", String.valueOf(servicio.getNumero())});
-        filas.add(new String[] {"Solicitud", servicio.getFechaSolicitud().format(formato)});
-        filas.add(new String[] {"Alquiler", servicio.getFechaAlquiler().format(formato)});
-        filas.add(new String[] {"Cliente",
-                servicio.getCliente().getNombre() + " (" + servicio.getCliente().getIdentificacion() + ")"});
-        filas.add(new String[] {"Empleado",
-                servicio.getEmpleado().getNombre() + " (" + servicio.getEmpleado().getIdentificacion() + ")"});
+        filas.add(new String[] {"Solicitud", formatear(servicio.getFechaSolicitud())});
+        filas.add(new String[] {"Alquiler", formatear(servicio.getFechaAlquiler())});
+        filas.add(new String[] {"Cliente", servicio.getCliente().getNombre() + " ("
+            + servicio.getCliente().getIdentificacion() + "), " + servicio.getCliente().getTelefono() + ", "
+            + servicio.getCliente().getCorreo()});
+        filas.add(new String[] {"Empleado", servicio.getEmpleado().getNombre() + " ("
+            + servicio.getEmpleado().getIdentificacion() + "), " + servicio.getEmpleado().getCargo()});
         for (Prenda prenda : servicio.getPrendas()) {
-            filas.add(new String[] {"Prenda", prenda.getReferencia() + " - " + prenda.getTipo()});
+            filas.add(new String[] {"Prenda", prenda.getReferencia() + ", " + prenda.getTipo() + ", "
+                + prenda.getColor() + ", talla " + prenda.getTalla() + ", "
+                + Terminal.moneda(prenda.getValorAlquiler()) + ", " + prenda.detalle()});
         }
         terminal.ficha("Servicio", filas);
+    }
+
+    private static String titulo(TipoPrenda tipo) {
+        return switch (tipo) {
+            case DAMA -> "Vestidos de dama";
+            case CABALLERO -> "Trajes de caballero";
+            case DISFRAZ -> "Disfraces";
+        };
+    }
+
+    private static String formatear(LocalDate fecha) {
+        return fecha.format(DateTimeFormatter.ofPattern(Constantes.FORMATO_FECHA));
     }
 }

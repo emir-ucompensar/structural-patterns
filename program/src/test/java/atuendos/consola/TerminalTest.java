@@ -85,6 +85,18 @@ class TerminalTest {
     }
 
     @Test
+    void tablaAlineaLasColumnas() {
+        Terminal terminal = terminal("");
+        terminal.tabla(new String[] {"Ref", "Color"},
+                List.of(new String[] {"F-01", "verde"}, new String[] {"D-100", "rojo"}));
+        List<String> lineas = salida().lines().toList();
+        assertEquals("  Ref    Color", lineas.get(0));
+        assertEquals("  -----  -----", lineas.get(1));
+        assertEquals("  F-01   verde", lineas.get(2));
+        assertEquals("  D-100  rojo", lineas.get(3));
+    }
+
+    @Test
     void formateaMonedaColombiana() {
         assertEquals("$ 80.000", Terminal.moneda(80000));
     }

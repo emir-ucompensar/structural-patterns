@@ -168,6 +168,37 @@ public class Terminal {
     }
 
     /**
+     * Muestra una tabla con encabezado y columnas alineadas.
+     *
+     * @param cabeceras títulos de las columnas
+     * @param filas filas de la tabla, con una celda por columna
+     */
+    public void tabla(String[] cabeceras, List<String[]> filas) {
+        int[] anchos = new int[cabeceras.length];
+        for (int i = 0; i < cabeceras.length; i++) {
+            anchos[i] = cabeceras[i].length();
+            for (String[] fila : filas) {
+                anchos[i] = Math.max(anchos[i], fila[i].length());
+            }
+        }
+        StringBuilder encabezado = new StringBuilder("  ");
+        StringBuilder separador = new StringBuilder("  ");
+        for (int i = 0; i < cabeceras.length; i++) {
+            encabezado.append(rellenar(cabeceras[i], anchos[i])).append("  ");
+            separador.append((ansi ? "─" : "-").repeat(anchos[i])).append("  ");
+        }
+        salida.println(estilo(NEGRITA + CIAN, encabezado.toString().stripTrailing()));
+        salida.println(estilo(TENUE, separador.toString().stripTrailing()));
+        for (String[] fila : filas) {
+            StringBuilder linea = new StringBuilder("  ");
+            for (int i = 0; i < cabeceras.length; i++) {
+                linea.append(rellenar(fila[i], anchos[i])).append("  ");
+            }
+            salida.println(linea.toString().stripTrailing());
+        }
+    }
+
+    /**
      * Pide un texto, que puede quedar vacío.
      *
      * @param etiqueta nombre del dato
