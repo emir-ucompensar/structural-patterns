@@ -37,7 +37,7 @@ public final class Conexion {
             }
             crearEsquema();
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_CONEXION, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 

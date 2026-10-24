@@ -106,7 +106,7 @@ public class ServicioRepositorioSqlite implements ServicioRepositorio {
                 conexion.setAutoCommit(autoConfirmar);
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -139,7 +139,7 @@ public class ServicioRepositorioSqlite implements ServicioRepositorio {
                 }
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
         String inconsistente = String.format(Constantes.MSG_SERVICIO_INCONSISTENTE, numero);
         Empleado empleado = empleados.buscar(empleadoId).orElseThrow(() -> new AtuendosException(inconsistente));
@@ -160,7 +160,7 @@ public class ServicioRepositorioSqlite implements ServicioRepositorio {
                 return fila.next() && fila.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -186,7 +186,7 @@ public class ServicioRepositorioSqlite implements ServicioRepositorio {
                 }
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
         List<ServicioAlquiler> servicios = new ArrayList<>();
         for (int numero : numeros) {

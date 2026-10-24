@@ -91,7 +91,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
             poner(sentencia, 12, nombreDisfraz, Types.VARCHAR);
             sentencia.executeUpdate();
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -103,7 +103,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
                 return fila.next() ? Optional.of(desdeFila(fila)) : Optional.empty();
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -112,7 +112,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
         try (PreparedStatement sentencia = conexion.prepareStatement(LISTAR)) {
             return leerTodas(sentencia);
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -128,7 +128,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
             }
             return leerTodas(sentencia);
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 

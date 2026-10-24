@@ -55,7 +55,7 @@ public class ClienteRepositorioSqlite implements ClienteRepositorio {
             sentencia.setString(5, cliente.getCorreo());
             sentencia.executeUpdate();
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -71,7 +71,7 @@ public class ClienteRepositorioSqlite implements ClienteRepositorio {
                         fila.getString(4), fila.getString(5)));
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -85,7 +85,7 @@ public class ClienteRepositorioSqlite implements ClienteRepositorio {
                         filas.getString(4), filas.getString(5)));
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
         return lista;
     }

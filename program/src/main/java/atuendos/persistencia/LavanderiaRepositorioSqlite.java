@@ -71,7 +71,7 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
                 }
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
     }
 
@@ -86,7 +86,7 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
                 referencias.add(resultado.getString(2));
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
         List<PrendaEnLavanderia> lista = new ArrayList<>();
         for (int i = 0; i < filas.size(); i++) {
@@ -119,7 +119,7 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
                 conexion.setAutoCommit(autoConfirmar);
             }
         } catch (SQLException e) {
-            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+            throw ErroresBaseDatos.traducir(e);
         }
         return enviadas;
     }
