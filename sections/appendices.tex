@@ -5,3 +5,54 @@
 % Use appendices for supporting data, derivations, instruments, or extended
 % material that would interrupt the main paper flow.
 
+\lstset{literate=%
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {¿}{{?`}}1 {¡}{{!`}}1}
+
+\subsection{Script de la base de datos}
+
+Archivo \texttt{program/database/esquema.sql}, que la aplicación ejecuta al conectarse.
+
+\lstinputlisting[language=SQL]{program/database/esquema.sql}
+
+\subsection{Factory Method}
+
+Clase \texttt{FabricaPrenda}, el creador, y una fábrica concreta.
+
+\lstinputlisting[language=Java,firstline=14,lastline=82,firstnumber=14]{program/src/main/java/atuendos/fabrica/FabricaPrenda.java}
+
+\lstinputlisting[language=Java,firstline=16,lastline=40,firstnumber=16]{program/src/main/java/atuendos/fabrica/FabricaVestidoDama.java}
+
+\subsection{Singleton}
+
+Clase \texttt{Conexion}.
+
+\lstinputlisting[language=Java,firstline=20,lastline=120,firstnumber=20]{program/src/main/java/atuendos/persistencia/Conexion.java}
+
+\subsection{Facade}
+
+Método \texttt{registrarServicio} de la clase \texttt{NegocioAlquiler}.
+
+\lstinputlisting[language=Java,firstline=177,lastline=225,firstnumber=177]{program/src/main/java/atuendos/negocio/NegocioAlquiler.java}
+
+\subsection{Evidencia de las pruebas}
+
+Resultado de \texttt{mvn test}, con el número de pruebas por clase.
+
+\begin{lstlisting}[numbers=none]
+Tests run: 18, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.negocio.NegocioAlquilerTest
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.fabrica.FabricaPrendaTest
+Tests run: 28, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.consola.MenuTest
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.consola.TerminalTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.consola.TerminalInteractivaTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.persistencia.ErroresBaseDatosTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.persistencia.EsquemaDesactualizadoTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.persistencia.LavanderiaRepositorioSqliteTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.persistencia.ConexionTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.persistencia.ServicioRepositorioSqliteTest
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0 -- atuendos.persistencia.RepositoriosSqliteTest
+
+Tests run: 114, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+\end{lstlisting}
