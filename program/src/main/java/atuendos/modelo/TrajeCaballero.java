@@ -12,7 +12,7 @@ package atuendos.modelo;
 public class TrajeCaballero extends Prenda {
 
     private final TipoTraje tipoTraje;
-    private final Aderezo aderezo;
+    private final Accesorio accesorio;
 
     /**
      * Crea un traje de caballero.
@@ -23,13 +23,13 @@ public class TrajeCaballero extends Prenda {
      * @param talla talla del traje
      * @param valorAlquiler valor del alquiler
      * @param tipoTraje tipo de traje
-     * @param aderezo aderezo que lo acompaña
+     * @param accesorio accesorio que lo acompaña
      */
     public TrajeCaballero(String referencia, String color, String marca, String talla, double valorAlquiler,
-            TipoTraje tipoTraje, Aderezo aderezo) {
+            TipoTraje tipoTraje, Accesorio accesorio) {
         super(referencia, color, marca, talla, valorAlquiler);
         this.tipoTraje = tipoTraje;
-        this.aderezo = aderezo;
+        this.accesorio = accesorio;
     }
 
     @Override
@@ -39,14 +39,14 @@ public class TrajeCaballero extends Prenda {
 
     @Override
     public String detalle() {
-        return String.format("traje %s, %s", tipoTraje, aderezo);
+        return String.format("traje %s, %s", tipoTraje, accesorio);
     }
 
     public TipoTraje getTipoTraje() {
         return tipoTraje;
     }
 
-    public Aderezo getAderezo() {
-        return aderezo;
+    public Accesorio getAccesorio() {
+        return accesorio;
     }
 }

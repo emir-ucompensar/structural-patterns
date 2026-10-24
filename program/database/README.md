@@ -39,7 +39,7 @@ erDiagram
         TEXT altura "solo dama, LARGO o CORTO"
         INTEGER cantidad_piezas "solo dama"
         TEXT tipo_traje "solo caballero"
-        TEXT aderezo "solo caballero"
+        TEXT accesorio "solo caballero"
         TEXT nombre_disfraz "solo disfraz"
     }
 

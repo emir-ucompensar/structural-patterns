@@ -37,20 +37,20 @@ CREATE TABLE IF NOT EXISTS prenda (
     cantidad_piezas INTEGER CHECK (cantidad_piezas > 0),
     -- caballero
     tipo_traje      TEXT    CHECK (tipo_traje IN ('CONVENCIONAL', 'FRAC', 'SACOLEVA', 'OTRO')),
-    aderezo         TEXT    CHECK (aderezo IN ('CORBATA', 'CORBATIN', 'PLASTRON')),
+    accesorio       TEXT    CHECK (accesorio IN ('CORBATA', 'CORBATIN', 'PLASTRON')),
     -- disfraz
     nombre_disfraz  TEXT,
     CHECK (
         (tipo = 'DAMA'
             AND pedreria IS NOT NULL AND altura IS NOT NULL AND cantidad_piezas IS NOT NULL
-            AND tipo_traje IS NULL AND aderezo IS NULL AND nombre_disfraz IS NULL)
+            AND tipo_traje IS NULL AND accesorio IS NULL AND nombre_disfraz IS NULL)
         OR (tipo = 'CABALLERO'
-            AND tipo_traje IS NOT NULL AND aderezo IS NOT NULL
+            AND tipo_traje IS NOT NULL AND accesorio IS NOT NULL
             AND pedreria IS NULL AND altura IS NULL AND cantidad_piezas IS NULL AND nombre_disfraz IS NULL)
         OR (tipo = 'DISFRAZ'
             AND nombre_disfraz IS NOT NULL
             AND pedreria IS NULL AND altura IS NULL AND cantidad_piezas IS NULL
-            AND tipo_traje IS NULL AND aderezo IS NULL)
+            AND tipo_traje IS NULL AND accesorio IS NULL)
     )
 );
 

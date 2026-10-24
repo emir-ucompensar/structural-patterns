@@ -36,10 +36,10 @@ import java.util.Optional;
 public class PrendaRepositorioSqlite implements PrendaRepositorio {
 
     private static final String INSERTAR = "INSERT INTO prenda (referencia, tipo, color, marca, talla, "
-            + "valor_alquiler, pedreria, altura, cantidad_piezas, tipo_traje, aderezo, nombre_disfraz) "
+            + "valor_alquiler, pedreria, altura, cantidad_piezas, tipo_traje, accesorio, nombre_disfraz) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String COLUMNAS = "SELECT referencia, tipo, color, marca, talla, valor_alquiler, "
-            + "pedreria, altura, cantidad_piezas, tipo_traje, aderezo, nombre_disfraz FROM prenda ";
+            + "pedreria, altura, cantidad_piezas, tipo_traje, accesorio, nombre_disfraz FROM prenda ";
     private static final String BUSCAR = COLUMNAS + "WHERE referencia = ?";
     private static final String LISTAR = COLUMNAS + "ORDER BY tipo, referencia";
     private static final String POR_TALLAS = COLUMNAS + "WHERE UPPER(talla) IN (%s) ORDER BY tipo, referencia";
@@ -64,7 +64,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
         String altura = null;
         Integer cantidadPiezas = null;
         String tipoTraje = null;
-        String aderezo = null;
+        String accesorio = null;
         String nombreDisfraz = null;
         if (prenda instanceof VestidoDama dama) {
             pedreria = dama.isPedreria() ? 1 : 0;
@@ -72,7 +72,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
             cantidadPiezas = dama.getCantidadPiezas();
         } else if (prenda instanceof TrajeCaballero traje) {
             tipoTraje = traje.getTipoTraje().name();
-            aderezo = traje.getAderezo().name();
+            accesorio = traje.getAccesorio().name();
         } else if (prenda instanceof Disfraz disfraz) {
             nombreDisfraz = disfraz.getNombre();
         }
@@ -87,7 +87,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
             poner(sentencia, 8, altura, Types.VARCHAR);
             poner(sentencia, 9, cantidadPiezas, Types.INTEGER);
             poner(sentencia, 10, tipoTraje, Types.VARCHAR);
-            poner(sentencia, 11, aderezo, Types.VARCHAR);
+            poner(sentencia, 11, accesorio, Types.VARCHAR);
             poner(sentencia, 12, nombreDisfraz, Types.VARCHAR);
             sentencia.executeUpdate();
         } catch (SQLException e) {
@@ -151,7 +151,7 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
         agregar(especificos, Constantes.CAMPO_ALTURA, fila.getString("altura"));
         agregar(especificos, Constantes.CAMPO_CANTIDAD_PIEZAS, fila.getString("cantidad_piezas"));
         agregar(especificos, Constantes.CAMPO_TIPO_TRAJE, fila.getString("tipo_traje"));
-        agregar(especificos, Constantes.CAMPO_ADEREZO, fila.getString("aderezo"));
+        agregar(especificos, Constantes.CAMPO_ACCESORIO, fila.getString("accesorio"));
         agregar(especificos, Constantes.CAMPO_NOMBRE_DISFRAZ, fila.getString("nombre_disfraz"));
         DatosPrenda datos = new DatosPrenda(tipo, fila.getString("referencia"), fila.getString("color"),
                 fila.getString("marca"), fila.getString("talla"), fila.getDouble("valor_alquiler"), especificos);

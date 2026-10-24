@@ -53,7 +53,7 @@ public final class Constantes {
     public static final String CAMPO_ALTURA = "altura";
     public static final String CAMPO_CANTIDAD_PIEZAS = "cantidadPiezas";
     public static final String CAMPO_TIPO_TRAJE = "tipoTraje";
-    public static final String CAMPO_ADEREZO = "aderezo";
+    public static final String CAMPO_ACCESORIO = "accesorio";
     public static final String CAMPO_NOMBRE_DISFRAZ = "nombreDisfraz";
 
     /** Mensaje genérico cuando falla una operación en la base de datos. */

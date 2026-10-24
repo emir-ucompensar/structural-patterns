@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import atuendos.comun.AtuendosException;
 import atuendos.comun.Constantes;
-import atuendos.modelo.Aderezo;
+import atuendos.modelo.Accesorio;
 import atuendos.modelo.Altura;
 import atuendos.modelo.Disfraz;
 import atuendos.modelo.Prenda;
@@ -54,11 +54,11 @@ class FabricaPrendaTest {
     @Test
     void creaTrajeCaballero() throws AtuendosException {
         DatosPrenda datos = new DatosPrenda(TipoPrenda.CABALLERO, "C-01", "negro", "Marca", "L", 90000,
-                Map.of(Constantes.CAMPO_TIPO_TRAJE, "FRAC", Constantes.CAMPO_ADEREZO, "corbatin"));
+                Map.of(Constantes.CAMPO_TIPO_TRAJE, "FRAC", Constantes.CAMPO_ACCESORIO, "corbatin"));
         TrajeCaballero traje = assertInstanceOf(TrajeCaballero.class,
                 FabricaPrenda.para(TipoPrenda.CABALLERO).crearPrenda(datos));
         assertEquals(TipoTraje.FRAC, traje.getTipoTraje());
-        assertEquals(Aderezo.CORBATIN, traje.getAderezo());
+        assertEquals(Accesorio.CORBATIN, traje.getAccesorio());
     }
 
     @Test

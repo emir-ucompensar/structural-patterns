@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import atuendos.comun.AtuendosException;
-import atuendos.modelo.Aderezo;
+import atuendos.modelo.Accesorio;
 import atuendos.modelo.Altura;
 import atuendos.modelo.Cliente;
 import atuendos.modelo.Disfraz;
@@ -112,10 +112,10 @@ class RepositoriosSqliteTest {
 
     @Test
     void guardaYBuscaUnTrajeCaballero() throws AtuendosException {
-        prendas.guardar(new TrajeCaballero("C-01", "negro", "Marca", "L", 90000, TipoTraje.FRAC, Aderezo.CORBATIN));
+        prendas.guardar(new TrajeCaballero("C-01", "negro", "Marca", "L", 90000, TipoTraje.FRAC, Accesorio.CORBATIN));
         TrajeCaballero traje = assertInstanceOf(TrajeCaballero.class, prendas.buscar("C-01").orElseThrow());
         assertEquals(TipoTraje.FRAC, traje.getTipoTraje());
-        assertEquals(Aderezo.CORBATIN, traje.getAderezo());
+        assertEquals(Accesorio.CORBATIN, traje.getAccesorio());
     }
 
     @Test
@@ -147,7 +147,7 @@ class RepositoriosSqliteTest {
     void listaPrendasYFiltraPorTallaSinDistinguirMayusculas() throws AtuendosException {
         prendas.guardar(new Disfraz("F-02", "azul", "Marca", "s", 1000, "Pirata"));
         prendas.guardar(new VestidoDama("D-01", "rojo", "Marca", "S", 80000, true, Altura.LARGO, 2));
-        prendas.guardar(new TrajeCaballero("C-01", "negro", "Marca", "L", 90000, TipoTraje.FRAC, Aderezo.CORBATA));
+        prendas.guardar(new TrajeCaballero("C-01", "negro", "Marca", "L", 90000, TipoTraje.FRAC, Accesorio.CORBATA));
         assertEquals(3, prendas.listar().size());
         assertEquals(2, prendas.buscarPorTallas(List.of("S")).size());
         assertEquals(2, prendas.buscarPorTallas(List.of("s")).size());

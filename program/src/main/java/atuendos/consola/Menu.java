@@ -9,7 +9,7 @@ package atuendos.consola;
 import atuendos.comun.AtuendosException;
 import atuendos.comun.Constantes;
 import atuendos.fabrica.DatosPrenda;
-import atuendos.modelo.Aderezo;
+import atuendos.modelo.Accesorio;
 import atuendos.modelo.Altura;
 import atuendos.modelo.Cliente;
 import atuendos.modelo.Empleado;
@@ -183,7 +183,7 @@ public class Menu {
             case CABALLERO -> {
                 especificos.put(Constantes.CAMPO_TIPO_TRAJE,
                         terminal.elegirEnum("Tipo de traje", TipoTraje.class).name());
-                especificos.put(Constantes.CAMPO_ADEREZO, terminal.elegirEnum("Aderezo", Aderezo.class).name());
+                especificos.put(Constantes.CAMPO_ACCESORIO, terminal.elegirEnum("Accesorio", Accesorio.class).name());
             }
             case DISFRAZ -> especificos.put(Constantes.CAMPO_NOMBRE_DISFRAZ,
                     terminal.leerObligatorio("Nombre del disfraz"));

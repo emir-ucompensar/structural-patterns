@@ -8,7 +8,7 @@ package atuendos.fabrica;
 
 import atuendos.comun.AtuendosException;
 import atuendos.comun.Constantes;
-import atuendos.modelo.Aderezo;
+import atuendos.modelo.Accesorio;
 import atuendos.modelo.Prenda;
 import atuendos.modelo.TipoPrenda;
 import atuendos.modelo.TipoTraje;
@@ -29,6 +29,6 @@ public class FabricaTrajeCaballero extends FabricaPrenda {
         return new TrajeCaballero(datos.referencia().trim(), datos.color().trim(), datos.marca().trim(),
                 datos.talla().trim(), datos.valorAlquiler(),
                 datos.enumerado(Constantes.CAMPO_TIPO_TRAJE, TipoTraje.class),
-                datos.enumerado(Constantes.CAMPO_ADEREZO, Aderezo.class));
+                datos.enumerado(Constantes.CAMPO_ACCESORIO, Accesorio.class));
     }
 }

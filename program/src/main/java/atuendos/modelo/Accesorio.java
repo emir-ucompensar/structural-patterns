@@ -7,9 +7,9 @@
 package atuendos.modelo;
 
 /**
- * Aderezo de un traje de caballero.
+ * Accesorio de un traje de caballero.
  */
-public enum Aderezo {
+public enum Accesorio {
     CORBATA,
     CORBATIN,
     PLASTRON
