@@ -164,6 +164,17 @@ public class NegocioAlquiler {
     }
 
     /**
+     * Indica si ya hay una prenda con la referencia dada.
+     *
+     * @param referencia referencia a buscar
+     * @return verdadero si la referencia ya está registrada
+     * @throws AtuendosException si la referencia está vacía o falla la base de datos
+     */
+    public boolean existePrenda(String referencia) throws AtuendosException {
+        return prendas.buscar(obligatorio(Constantes.CAMPO_REFERENCIA, referencia)).isPresent();
+    }
+
+    /**
      * Registra un servicio de alquiler. Exige que el cliente, el empleado y
      * las prendas estén registrados, y que las prendas estén disponibles para
      * la fecha. La fecha de solicitud es la del sistema y el número es el

@@ -66,6 +66,8 @@ public final class Constantes {
 
     /** Nombre del campo referencia, usado en datos y mensajes. */
     public static final String CAMPO_REFERENCIA = "referencia";
+    /** Ejemplo de referencia que se muestra al pedirla. */
+    public static final String EJEMPLO_REFERENCIA = "REF000";
     /** Nombre del campo color, usado en datos y mensajes. */
     public static final String CAMPO_COLOR = "color";
     /** Nombre del campo marca, usado en datos y mensajes. */
