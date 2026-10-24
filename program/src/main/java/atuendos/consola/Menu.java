@@ -68,6 +68,7 @@ public class Menu {
     private final Terminal terminal;
     private final NegocioAlquiler negocio;
     private final List<Grupo> grupos;
+    private String aviso;
 
     /**
      * Crea el menú sobre una terminal y la fachada de negocio.
@@ -103,20 +104,25 @@ public class Menu {
      * Muestra el menú y atiende opciones hasta que se elige salir o se acaba la entrada.
      */
     public void ejecutar() {
-        terminal.banner(TITULO, SUBTITULO);
+        boolean primera = true;
         try {
             while (true) {
+                if (terminal.limpiar() || primera) {
+                    terminal.banner(TITULO, SUBTITULO);
+                }
+                primera = false;
                 terminal.seccion("Menú principal");
                 for (int i = 0; i < grupos.size(); i++) {
                     terminal.opcion(String.valueOf(i + 1), grupos.get(i).titulo());
                 }
                 terminal.opcion("0", "Salir");
+                mostrarAviso();
                 int eleccion = leerOpcion();
                 if (eleccion == 0) {
                     break;
                 }
                 if (eleccion < 0 || eleccion > grupos.size()) {
-                    terminal.error(MSG_OPCION_NO_VALIDA);
+                    aviso = MSG_OPCION_NO_VALIDA;
                     continue;
                 }
                 atenderGrupo(grupos.get(eleccion - 1));
@@ -124,10 +130,12 @@ public class Menu {
         } catch (NoSuchElementException e) {
             terminal.linea("");
         }
+        terminal.limpiar();
         terminal.info(MSG_DESPEDIDA);
     }
 
     private void atenderGrupo(Grupo grupo) {
+        terminal.limpiar();
         terminal.seccion(grupo.titulo());
         for (int i = 0; i < grupo.opciones().size(); i++) {
             terminal.opcion(String.valueOf(i + 1), grupo.opciones().get(i).texto());
@@ -138,10 +146,17 @@ public class Menu {
             return;
         }
         if (eleccion < 0 || eleccion > grupo.opciones().size()) {
-            terminal.error(MSG_OPCION_NO_VALIDA);
+            aviso = MSG_OPCION_NO_VALIDA;
             return;
         }
         ejecutarAccion(grupo.opciones().get(eleccion - 1).accion());
+    }
+
+    private void mostrarAviso() {
+        if (aviso != null) {
+            terminal.error(aviso);
+            aviso = null;
+        }
     }
 
     private int leerOpcion() {
@@ -153,6 +168,7 @@ public class Menu {
     }
 
     private void ejecutarAccion(Accion accion) {
+        terminal.limpiar();
         try {
             accion.ejecutar();
         } catch (AtuendosException e) {
@@ -162,12 +178,14 @@ public class Menu {
         } catch (RuntimeException e) {
             terminal.error(MSG_INESPERADO);
         }
+        terminal.linea("");
+        terminal.pausar();
     }
 
     private void registrarPrenda() throws AtuendosException {
         terminal.seccion("Registrar prenda");
         TipoPrenda tipo = terminal.elegirEnum("Tipo de prenda", TipoPrenda.class);
-        String referencia = terminal.leerObligatorio("Referencia");
+        String referencia = leerReferenciaNueva();
         String color = terminal.leerObligatorio("Color");
         String marca = terminal.leerObligatorio("Marca");
         String talla = Constantes.TALLAS.get(terminal.elegir("Talla", Constantes.TALLAS));
@@ -192,6 +210,16 @@ public class Menu {
                 new DatosPrenda(tipo, referencia, color, marca, talla, valor, especificos));
         terminal.exito("Prenda registrada.");
         fichaPrenda(prenda);
+    }
+
+    private String leerReferenciaNueva() throws AtuendosException {
+        while (true) {
+            String referencia = terminal.leerObligatorio("Referencia (ejemplo: " + Constantes.EJEMPLO_REFERENCIA + ")");
+            if (!negocio.existePrenda(referencia)) {
+                return referencia;
+            }
+            terminal.error(String.format(Constantes.MSG_PRENDA_EXISTE, referencia.trim()));
+        }
     }
 
     private void registrarCliente() throws AtuendosException {
@@ -223,7 +251,8 @@ public class Menu {
         String clienteId = terminal.leerObligatorio("Identificación del cliente");
         String empleadoId = terminal.leerObligatorio("Identificación del empleado");
         LocalDate fecha = terminal.leerFecha("Fecha de alquiler (dd/mm/aaaa)");
-        terminal.linea("Referencias de las prendas, una por línea; vacío para terminar.");
+        terminal.linea("Referencias de las prendas (ejemplo: " + Constantes.EJEMPLO_REFERENCIA
+                + "), una por línea; vacío para terminar.");
         List<String> referencias = new ArrayList<>();
         while (true) {
             String referencia = terminal.leer("Prenda " + (referencias.size() + 1));

@@ -196,6 +196,19 @@ class MenuTest {
     }
 
     @Test
+    void sugiereUnEjemploDeReferenciaYNoAceptaUnaRepetida() {
+        String salida = ejecutar(DISFRAZ + "1\n1\n3\nF-01\nF-03\nrojo\nMarca\n2\n40000\nOso\n0\n");
+        assertTrue(salida.contains("Referencia (ejemplo: REF000)"));
+        assertTrue(salida.contains("Ya existe una prenda con la referencia F-01."));
+        assertTrue(salida.contains("Prenda registrada."));
+    }
+
+    @Test
+    void conEntradaRedirigidaNoLimpiaLaPantalla() {
+        assertFalse(ejecutar("1\n0\n0\n").contains("\u001B[2J"));
+    }
+
+    @Test
     void registraUnaPrendaParaLavanderiaConPrioridad() {
         String salida = ejecutar(DISFRAZ + "4\n1\nF-01\ns\n0\n");
         assertTrue(salida.contains("Prenda registrada con prioridad"));

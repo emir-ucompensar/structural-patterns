@@ -42,6 +42,7 @@ public class Terminal implements AutoCloseable {
     private static final String ROJO = "\u001B[31m";
     private static final String VERDE = "\u001B[32m";
     private static final String CIAN = "\u001B[36m";
+    private static final String BORRAR_PANTALLA = "\u001B[H\u001B[2J\u001B[3J";
 
     private static final DateTimeFormatter FECHA_LATINA =
             DateTimeFormatter.ofPattern("d/M/uuuu").withResolverStyle(ResolverStyle.STRICT);
@@ -52,6 +53,7 @@ public class Terminal implements AutoCloseable {
     private static final String MSG_FECHA = "Fecha no válida. Formato esperado: dd/mm/aaaa.";
     private static final String MSG_SI_NO = "Se esperaba s o n.";
     private static final String MSG_OPCION = "Opción no válida.";
+    private static final String MSG_PAUSA = "Presiona Enter para continuar";
     private static final String MSG_SELECCION_MINIMA = "Elige al menos %d.";
     private static final String AYUDA_UNA = "flechas: mover | enter: elegir";
     private static final String AYUDA_VARIAS = "flechas: mover | espacio: marcar | enter: confirmar";
@@ -142,6 +144,31 @@ public class Terminal implements AutoCloseable {
      */
     public static String moneda(double valor) {
         return String.format(Locale.forLanguageTag("es-CO"), "$ %,.0f", valor);
+    }
+
+    /**
+     * Borra la pantalla y deja el cursor arriba. Solo actúa en una terminal
+     * interactiva; con la entrada redirigida no escribe nada.
+     *
+     * @return verdadero si la pantalla se borró
+     */
+    public boolean limpiar() {
+        if (jline == null) {
+            return false;
+        }
+        salida.print(BORRAR_PANTALLA);
+        salida.flush();
+        return true;
+    }
+
+    /**
+     * Espera a que el usuario pulse Enter, para que alcance a leer lo que hay en
+     * pantalla antes de limpiarla. Solo actúa en una terminal interactiva.
+     */
+    public void pausar() {
+        if (jline != null) {
+            leer(MSG_PAUSA);
+        }
     }
 
     /**

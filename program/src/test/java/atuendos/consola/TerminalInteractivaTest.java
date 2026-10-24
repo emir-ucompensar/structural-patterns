@@ -65,6 +65,15 @@ class TerminalInteractivaTest {
     }
 
     @Test
+    void limpiaLaPantallaYEsperaEnter() throws IOException {
+        try (Terminal terminal = terminal("\r")) {
+            assertTrue(terminal.limpiar());
+            terminal.pausar();
+            assertTrue(salida().contains("\u001B[2J"));
+        }
+    }
+
+    @Test
     void eligeUnaOpcionConLasFlechas() throws IOException {
         try (Terminal terminal = terminal(ABAJO + ABAJO + "\r")) {
             assertEquals(2, terminal.elegir("Talla", TALLAS));
