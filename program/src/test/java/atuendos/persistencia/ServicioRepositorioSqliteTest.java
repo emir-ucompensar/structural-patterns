@@ -90,6 +90,30 @@ class ServicioRepositorioSqliteTest {
     }
 
     @Test
+    void buscaServiciosVigentesDeUnClientePorFecha() throws AtuendosException {
+        servicios.guardar(SOLICITUD, ALQUILER.plusDays(5), empleado, cliente, List.of(primera));
+        servicios.guardar(SOLICITUD, ALQUILER, empleado, cliente, List.of(segunda));
+        servicios.guardar(SOLICITUD, ALQUILER.minusDays(20), empleado, cliente, List.of(primera));
+        List<ServicioAlquiler> vigentes = servicios.buscarPorCliente("100", SOLICITUD);
+        assertEquals(2, vigentes.size());
+        assertEquals(2, vigentes.get(0).getNumero());
+        assertEquals(1, vigentes.get(1).getNumero());
+        assertEquals(3, servicios.buscarPorCliente("100", ALQUILER.minusDays(30)).size());
+        assertTrue(servicios.buscarPorCliente("100", ALQUILER.plusDays(6)).isEmpty());
+        assertTrue(servicios.buscarPorCliente("999", SOLICITUD).isEmpty());
+    }
+
+    @Test
+    void buscaServiciosPorFechaDeAlquiler() throws AtuendosException {
+        servicios.guardar(SOLICITUD, ALQUILER, empleado, cliente, List.of(primera));
+        servicios.guardar(SOLICITUD, ALQUILER, empleado, cliente, List.of(segunda));
+        servicios.guardar(SOLICITUD, ALQUILER.plusDays(1), empleado, cliente, List.of(primera));
+        assertEquals(2, servicios.buscarPorFecha(ALQUILER).size());
+        assertEquals(1, servicios.buscarPorFecha(ALQUILER.plusDays(1)).size());
+        assertTrue(servicios.buscarPorFecha(ALQUILER.plusDays(2)).isEmpty());
+    }
+
+    @Test
     void siFallaNoQuedaNadaGuardado() throws AtuendosException {
         Prenda noRegistrada = new Disfraz("X-99", "rojo", "Marca", "S", 1000, "Fantasma");
         assertThrows(AtuendosException.class,

@@ -14,6 +14,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,6 +27,9 @@ public class ClienteRepositorioSqlite implements ClienteRepositorio {
             "INSERT INTO cliente (identificacion, nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?, ?)";
     private static final String BUSCAR =
             "SELECT identificacion, nombre, direccion, telefono, correo FROM cliente WHERE identificacion = ?";
+
+    private static final String LISTAR =
+            "SELECT identificacion, nombre, direccion, telefono, correo FROM cliente ORDER BY nombre";
 
     private final Connection conexion;
 
@@ -68,5 +73,20 @@ public class ClienteRepositorioSqlite implements ClienteRepositorio {
         } catch (SQLException e) {
             throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
         }
+    }
+
+    @Override
+    public List<Cliente> listar() throws AtuendosException {
+        List<Cliente> lista = new ArrayList<>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(LISTAR);
+                ResultSet filas = sentencia.executeQuery()) {
+            while (filas.next()) {
+                lista.add(new Cliente(filas.getString(1), filas.getString(2), filas.getString(3),
+                        filas.getString(4), filas.getString(5)));
+            }
+        } catch (SQLException e) {
+            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+        }
+        return lista;
     }
 }

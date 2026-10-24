@@ -42,6 +42,11 @@ public class ServicioRepositorioSqlite implements ServicioRepositorio {
             + "JOIN servicio s ON s.numero = sp.servicio_numero "
             + "WHERE sp.prenda_ref = ? AND s.fecha_alquiler = ?";
 
+    private static final String NUMEROS_POR_CLIENTE = "SELECT numero FROM servicio "
+            + "WHERE cliente_id = ? AND fecha_alquiler >= ? ORDER BY fecha_alquiler, numero";
+    private static final String NUMEROS_POR_FECHA =
+            "SELECT numero FROM servicio WHERE fecha_alquiler = ? ORDER BY numero";
+
     private final Connection conexion;
     private final ClienteRepositorio clientes;
     private final EmpleadoRepositorio empleados;
@@ -157,5 +162,36 @@ public class ServicioRepositorioSqlite implements ServicioRepositorio {
         } catch (SQLException e) {
             throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
         }
+    }
+
+    @Override
+    public List<ServicioAlquiler> buscarPorCliente(String clienteId, LocalDate desde) throws AtuendosException {
+        return cargar(NUMEROS_POR_CLIENTE, clienteId, desde.toString());
+    }
+
+    @Override
+    public List<ServicioAlquiler> buscarPorFecha(LocalDate fecha) throws AtuendosException {
+        return cargar(NUMEROS_POR_FECHA, fecha.toString());
+    }
+
+    private List<ServicioAlquiler> cargar(String sql, String... parametros) throws AtuendosException {
+        List<Integer> numeros = new ArrayList<>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            for (int i = 0; i < parametros.length; i++) {
+                sentencia.setString(i + 1, parametros[i]);
+            }
+            try (ResultSet filas = sentencia.executeQuery()) {
+                while (filas.next()) {
+                    numeros.add(filas.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+        }
+        List<ServicioAlquiler> servicios = new ArrayList<>();
+        for (int numero : numeros) {
+            buscar(numero).ifPresent(servicios::add);
+        }
+        return servicios;
     }
 }

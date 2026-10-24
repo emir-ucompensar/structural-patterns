@@ -103,6 +103,9 @@ public final class Constantes {
     public static final String CAMPO_CARGO = "cargo";
     public static final String CAMPO_FECHA_ALQUILER = "fechaAlquiler";
 
+    /** Mensaje cuando no existe un servicio con ese número; recibe el número. */
+    public static final String MSG_SERVICIO_NO_EXISTE = "No existe un servicio con el número %d.";
+
     private Constantes() {
     }
 }

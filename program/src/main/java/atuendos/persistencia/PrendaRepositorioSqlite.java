@@ -21,7 +21,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,9 +36,11 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
     private static final String INSERTAR = "INSERT INTO prenda (referencia, tipo, color, marca, talla, "
             + "valor_alquiler, pedreria, altura, cantidad_piezas, tipo_traje, aderezo, nombre_disfraz) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String BUSCAR = "SELECT referencia, tipo, color, marca, talla, valor_alquiler, "
-            + "pedreria, altura, cantidad_piezas, tipo_traje, aderezo, nombre_disfraz "
-            + "FROM prenda WHERE referencia = ?";
+    private static final String COLUMNAS = "SELECT referencia, tipo, color, marca, talla, valor_alquiler, "
+            + "pedreria, altura, cantidad_piezas, tipo_traje, aderezo, nombre_disfraz FROM prenda ";
+    private static final String BUSCAR = COLUMNAS + "WHERE referencia = ?";
+    private static final String LISTAR = COLUMNAS + "ORDER BY tipo, referencia";
+    private static final String POR_TALLA = COLUMNAS + "WHERE talla = ? COLLATE NOCASE ORDER BY tipo, referencia";
 
     private final Connection conexion;
 
@@ -94,27 +98,56 @@ public class PrendaRepositorioSqlite implements PrendaRepositorio {
         try (PreparedStatement sentencia = conexion.prepareStatement(BUSCAR)) {
             sentencia.setString(1, referencia);
             try (ResultSet fila = sentencia.executeQuery()) {
-                if (!fila.next()) {
-                    return Optional.empty();
-                }
-                TipoPrenda tipo = TipoPrenda.valueOf(fila.getString("tipo"));
-                Map<String, String> especificos = new HashMap<>();
-                String pedreria = fila.getString("pedreria");
-                agregar(especificos, Constantes.CAMPO_PEDRERIA,
-                        pedreria == null ? null : String.valueOf("1".equals(pedreria)));
-                agregar(especificos, Constantes.CAMPO_ALTURA, fila.getString("altura"));
-                agregar(especificos, Constantes.CAMPO_CANTIDAD_PIEZAS, fila.getString("cantidad_piezas"));
-                agregar(especificos, Constantes.CAMPO_TIPO_TRAJE, fila.getString("tipo_traje"));
-                agregar(especificos, Constantes.CAMPO_ADEREZO, fila.getString("aderezo"));
-                agregar(especificos, Constantes.CAMPO_NOMBRE_DISFRAZ, fila.getString("nombre_disfraz"));
-                DatosPrenda datos = new DatosPrenda(tipo, fila.getString("referencia"), fila.getString("color"),
-                        fila.getString("marca"), fila.getString("talla"), fila.getDouble("valor_alquiler"),
-                        especificos);
-                return Optional.of(FabricaPrenda.para(tipo).crearPrenda(datos));
+                return fila.next() ? Optional.of(desdeFila(fila)) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
         }
+    }
+
+    @Override
+    public List<Prenda> listar() throws AtuendosException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(LISTAR)) {
+            return leerTodas(sentencia);
+        } catch (SQLException e) {
+            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+        }
+    }
+
+    @Override
+    public List<Prenda> buscarPorTalla(String talla) throws AtuendosException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(POR_TALLA)) {
+            sentencia.setString(1, talla);
+            return leerTodas(sentencia);
+        } catch (SQLException e) {
+            throw new AtuendosException(Constantes.MSG_ERROR_BD, e);
+        }
+    }
+
+    private static List<Prenda> leerTodas(PreparedStatement sentencia) throws SQLException, AtuendosException {
+        List<Prenda> lista = new ArrayList<>();
+        try (ResultSet filas = sentencia.executeQuery()) {
+            while (filas.next()) {
+                lista.add(desdeFila(filas));
+            }
+        }
+        return lista;
+    }
+
+    private static Prenda desdeFila(ResultSet fila) throws SQLException, AtuendosException {
+        TipoPrenda tipo = TipoPrenda.valueOf(fila.getString("tipo"));
+        Map<String, String> especificos = new HashMap<>();
+        String pedreria = fila.getString("pedreria");
+        agregar(especificos, Constantes.CAMPO_PEDRERIA,
+                pedreria == null ? null : String.valueOf("1".equals(pedreria)));
+        agregar(especificos, Constantes.CAMPO_ALTURA, fila.getString("altura"));
+        agregar(especificos, Constantes.CAMPO_CANTIDAD_PIEZAS, fila.getString("cantidad_piezas"));
+        agregar(especificos, Constantes.CAMPO_TIPO_TRAJE, fila.getString("tipo_traje"));
+        agregar(especificos, Constantes.CAMPO_ADEREZO, fila.getString("aderezo"));
+        agregar(especificos, Constantes.CAMPO_NOMBRE_DISFRAZ, fila.getString("nombre_disfraz"));
+        DatosPrenda datos = new DatosPrenda(tipo, fila.getString("referencia"), fila.getString("color"),
+                fila.getString("marca"), fila.getString("talla"), fila.getDouble("valor_alquiler"), especificos);
+        return FabricaPrenda.para(tipo).crearPrenda(datos);
     }
 
     private static void poner(PreparedStatement sentencia, int posicion, Object valor, int tipoSql)

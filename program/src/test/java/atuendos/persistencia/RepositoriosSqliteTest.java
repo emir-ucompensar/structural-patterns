@@ -132,6 +132,29 @@ class RepositoriosSqliteTest {
     }
 
     @Test
+    void listaClientesYEmpleadosPorNombre() throws AtuendosException {
+        clientes.guardar(new Cliente("2", "Zoe", "Calle 1", "3", "z@correo.co"));
+        clientes.guardar(new Cliente("1", "Ana", "Calle 2", "4", "a@correo.co"));
+        empleados.guardar(new Empleado("9", "Mario", "Carrera 1", "5", "Vendedor"));
+        empleados.guardar(new Empleado("8", "Berta", "Carrera 2", "6", "Cajera"));
+        assertEquals("Ana", clientes.listar().get(0).getNombre());
+        assertEquals(2, clientes.listar().size());
+        assertEquals("Berta", empleados.listar().get(0).getNombre());
+    }
+
+    @Test
+    void listaPrendasYFiltraPorTallaSinDistinguirMayusculas() throws AtuendosException {
+        prendas.guardar(new Disfraz("F-02", "azul", "Marca", "s", 1000, "Pirata"));
+        prendas.guardar(new VestidoDama("D-01", "rojo", "Marca", "S", 80000, true, Altura.LARGO, 2));
+        prendas.guardar(new TrajeCaballero("C-01", "negro", "Marca", "L", 90000, TipoTraje.FRAC, Aderezo.CORBATA));
+        assertEquals(3, prendas.listar().size());
+        assertEquals(2, prendas.buscarPorTalla("S").size());
+        assertEquals(2, prendas.buscarPorTalla("s").size());
+        assertEquals("C-01", prendas.buscarPorTalla("L").get(0).getReferencia());
+        assertTrue(prendas.buscarPorTalla("XXL").isEmpty());
+    }
+
+    @Test
     void prendaInexistenteDevuelveVacio() throws AtuendosException {
         assertTrue(prendas.buscar("X-99").isEmpty());
     }

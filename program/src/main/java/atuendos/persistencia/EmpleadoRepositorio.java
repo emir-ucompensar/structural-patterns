@@ -9,6 +9,7 @@ package atuendos.persistencia;
 import atuendos.comun.AtuendosException;
 import atuendos.modelo.Empleado;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,4 +33,12 @@ public interface EmpleadoRepositorio {
      * @throws AtuendosException si falla la base de datos
      */
     Optional<Empleado> buscar(String identificacion) throws AtuendosException;
+
+    /**
+     * Lista todos los empleados registrados.
+     *
+     * @return los empleados ordenados por nombre
+     * @throws AtuendosException si falla la base de datos
+     */
+    List<Empleado> listar() throws AtuendosException;
 }

@@ -9,6 +9,7 @@ package atuendos.persistencia;
 import atuendos.comun.AtuendosException;
 import atuendos.modelo.Cliente;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,4 +33,12 @@ public interface ClienteRepositorio {
      * @throws AtuendosException si falla la base de datos
      */
     Optional<Cliente> buscar(String identificacion) throws AtuendosException;
+
+    /**
+     * Lista todos los clientes registrados.
+     *
+     * @return los clientes ordenados por nombre
+     * @throws AtuendosException si falla la base de datos
+     */
+    List<Cliente> listar() throws AtuendosException;
 }

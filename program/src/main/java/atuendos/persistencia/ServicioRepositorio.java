@@ -54,4 +54,24 @@ public interface ServicioRepositorio {
      * @throws AtuendosException si falla la base de datos
      */
     boolean estaAlquilada(String referencia, LocalDate fecha) throws AtuendosException;
+
+    /**
+     * Lista los servicios de un cliente cuya fecha de alquiler es igual o
+     * posterior a una fecha, ordenados por fecha de alquiler.
+     *
+     * @param clienteId identificación del cliente
+     * @param desde primera fecha de alquiler que se incluye
+     * @return los servicios vigentes del cliente
+     * @throws AtuendosException si falla la base de datos
+     */
+    List<ServicioAlquiler> buscarPorCliente(String clienteId, LocalDate desde) throws AtuendosException;
+
+    /**
+     * Lista los servicios con una fecha de alquiler.
+     *
+     * @param fecha fecha de alquiler
+     * @return los servicios de esa fecha, por número
+     * @throws AtuendosException si falla la base de datos
+     */
+    List<ServicioAlquiler> buscarPorFecha(LocalDate fecha) throws AtuendosException;
 }

@@ -9,6 +9,7 @@ package atuendos.persistencia;
 import atuendos.comun.AtuendosException;
 import atuendos.modelo.Prenda;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,4 +33,21 @@ public interface PrendaRepositorio {
      * @throws AtuendosException si falla la base de datos
      */
     Optional<Prenda> buscar(String referencia) throws AtuendosException;
+
+    /**
+     * Lista todas las prendas registradas.
+     *
+     * @return las prendas ordenadas por tipo y referencia
+     * @throws AtuendosException si falla la base de datos
+     */
+    List<Prenda> listar() throws AtuendosException;
+
+    /**
+     * Lista las prendas de una talla, sin distinguir mayúsculas.
+     *
+     * @param talla talla buscada
+     * @return las prendas ordenadas por tipo y referencia
+     * @throws AtuendosException si falla la base de datos
+     */
+    List<Prenda> buscarPorTalla(String talla) throws AtuendosException;
 }
