@@ -5,4 +5,39 @@
 % Use this section to connect findings back to the research question and the
 % theoretical framework.
 
-% Placeholder for analysis content
+\subsection{Patrones identificados}
+
+La \intab{tab:patrones} reúne los tres patrones que incorporé al diseño, el tipo de cada uno y la razón por la que mejora el diseño de ``Los Atuendos''.
+
+\begin{table}[H]
+\centering
+\caption{Patrones de diseño identificados y su justificación}
+\label{tab:patrones}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}p{2.4cm}p{2.2cm}X@{}}
+\toprule
+Patrón & Tipo & ¿Por qué contribuye a mejorar el diseño? \\
+\midrule
+Factory Method & Creación & Cada tipo de prenda trae datos propios, y su creación queda en una fábrica por tipo. Un tipo nuevo agrega una fábrica sin reescribir la fachada ni los repositorios, y los datos comunes se validan una sola vez en la clase base. En el estudio de \incitet{2026-abufakher-gof-design-patterns-quality}, Factory Method mostró métricas dentro de los rangos óptimos. \\
+\addlinespace
+Singleton & Creación & SQLite trabaja sobre un único archivo, y la aplicación necesita una sola conexión con las llaves foráneas activas y el esquema creado. El patrón garantiza esa instancia y un punto de acceso. La literatura reporta baja cohesión en Singleton, y \texttt{Conexion} se limita a abrir, entregar y cerrar la conexión \incitep{2026-abufakher-gof-design-patterns-quality}. \\
+\addlinespace
+Facade & Estructural & Registrar un servicio involucra cliente, empleado, prendas, disponibilidad y consecutivo. La fachada ofrece al menú una operación por funcionalidad y deja la consola sin dependencia de la persistencia. Los desarrolladores con experiencia valoran el patrón como una buena abstracción, y señalan que se diseña mal con facilidad \incitep{2012-zhang-follow-on-survey-patterns-controversial}. \\
+\bottomrule
+\end{tabularx}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{table}
+
+\subsection{Cohesión entre los patrones}
+
+Los tres patrones se encadenan en un mismo recorrido. El menú llama a la fachada, la fachada pide a la fábrica la prenda del tipo correspondiente, y el repositorio la guarda sobre la conexión única.
+
+La fachada \texttt{NegocioAlquiler} obtiene la conexión de \texttt{Conexion} una sola vez, al armarse con el método \texttt{crear}, y se la entrega a los cinco repositorios. Con eso el patrón Singleton queda en un único punto del programa, y el resto del código recibe la conexión como parámetro.
+
+El patrón Factory Method interviene en dos momentos. La fachada lo usa al registrar una prenda nueva, y \texttt{PrendaRepositorioSqlite} lo usa al reconstruir cada prenda leída de la tabla \texttt{prenda}, a partir de su tipo y de sus columnas propias. Las dos rutas crean prendas con las mismas fábricas y las mismas validaciones.
+
+Cada patrón atiende una necesidad distinta del caso. Factory Method resuelve la creación de prendas con datos propios por tipo, Singleton resuelve el recurso compartido, que es la base de datos, y Facade resuelve la interfaz simple para el menú. Dos son de creación y uno es estructural, y ninguno repite la función de otro.
+
+Descarté Bridge porque ninguna clase del caso crece en dos dimensiones independientes, y agregarlo habría sumado complejidad sin una necesidad que lo pidiera.
