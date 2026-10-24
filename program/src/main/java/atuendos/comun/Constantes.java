@@ -54,6 +54,18 @@ public final class Constantes {
     public static final String CAMPO_ADEREZO = "aderezo";
     public static final String CAMPO_NOMBRE_DISFRAZ = "nombreDisfraz";
 
+    /** Mensaje genérico cuando falla una operación en la base de datos. */
+    public static final String MSG_ERROR_BD = "Error al acceder a la base de datos.";
+
+    /** Mensaje cuando ya hay un cliente con esa identificación; recibe la identificación. */
+    public static final String MSG_CLIENTE_EXISTE = "Ya existe un cliente con la identificación %s.";
+
+    /** Mensaje cuando ya hay un empleado con esa identificación; recibe la identificación. */
+    public static final String MSG_EMPLEADO_EXISTE = "Ya existe un empleado con la identificación %s.";
+
+    /** Mensaje cuando ya hay una prenda con esa referencia; recibe la referencia. */
+    public static final String MSG_PRENDA_EXISTE = "Ya existe una prenda con la referencia %s.";
+
     private Constantes() {
     }
 }
