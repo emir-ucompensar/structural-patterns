@@ -29,6 +29,31 @@ public final class Constantes {
     /** Mensaje cuando no se puede leer el esquema empaquetado. */
     public static final String MSG_ERROR_ESQUEMA = "No se pudo leer el esquema de la base de datos.";
 
+    /** Mensaje cuando falta un dato obligatorio; recibe el nombre del campo. */
+    public static final String MSG_CAMPO_OBLIGATORIO = "El campo '%s' es obligatorio.";
+
+    /** Mensaje cuando un dato tiene un valor no admitido; recibe el campo y el valor. */
+    public static final String MSG_VALOR_INVALIDO = "Valor inválido en '%s': %s.";
+
+    /** Mensaje cuando un número no puede ser negativo; recibe el nombre del campo. */
+    public static final String MSG_VALOR_NEGATIVO = "El campo '%s' no puede ser negativo.";
+
+    /** Mensaje cuando la fábrica recibe datos de otro tipo de prenda; recibe el tipo. */
+    public static final String MSG_TIPO_INCORRECTO = "Los datos no corresponden al tipo de prenda %s.";
+
+    /** Nombres de los campos de una prenda, usados en datos y en mensajes. */
+    public static final String CAMPO_REFERENCIA = "referencia";
+    public static final String CAMPO_COLOR = "color";
+    public static final String CAMPO_MARCA = "marca";
+    public static final String CAMPO_TALLA = "talla";
+    public static final String CAMPO_VALOR_ALQUILER = "valorAlquiler";
+    public static final String CAMPO_PEDRERIA = "pedreria";
+    public static final String CAMPO_ALTURA = "altura";
+    public static final String CAMPO_CANTIDAD_PIEZAS = "cantidadPiezas";
+    public static final String CAMPO_TIPO_TRAJE = "tipoTraje";
+    public static final String CAMPO_ADEREZO = "aderezo";
+    public static final String CAMPO_NOMBRE_DISFRAZ = "nombreDisfraz";
+
     private Constantes() {
     }
 }
