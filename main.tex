@@ -19,7 +19,7 @@
 \begin{document}
 
 % Render the cover page before numbered front matter begins.
-% \input{sections/cover-page}
+\input{sections/cover-page}
 
 % Keep the table of contents under the same page style used by the paper body.
 \begingroup
@@ -30,47 +30,47 @@
 \newpage
 
 % Front matter is unnumbered and remains directly editable by the author.
-% \input{sections/abstract}
-% \input{sections/keywords}
+\input{sections/abstract}
+\input{sections/keywords}
 % \input{sections/acknowledgments}
 
 % Main sections use localized titles resolved from metadata. Start the
 % introduction on a fresh page after the front matter.
 
 % \newpage
-% \section{\sectionTitleIntroduction}
-% \input{sections/introduction}
+\section{\sectionTitleIntroduction}
+\input{sections/introduction}
 
-% \section{\sectionTitleTheoreticalFramework}
-% \input{sections/theoretical-framework}
+\section{\sectionTitleTheoreticalFramework}
+\input{sections/theoretical-framework}
 
-% \section{\sectionTitleMethodology}
-% \input{sections/methodology}
+\section{\sectionTitleMethodology}
+\input{sections/methodology}
 
-% \section{\sectionTitleResults}
-% \input{sections/results}
+\section{\sectionTitleResults}
+\input{sections/results}
 
-% \section{\sectionTitleAnalysis}
-% \input{sections/analysis}
+\section{\sectionTitleAnalysis}
+\input{sections/analysis}
 
-% \section{\sectionTitleConclusion}
-% \input{sections/conclusion}
+\section{\sectionTitleConclusion}
+\input{sections/conclusion}
 
 % \section{\sectionTitleGlossary}
 % \input{sections/glossary}
 
 % References are handled by BibTeX through sections/references.tex.
-% \newpage
-% \section{\sectionTitleReferences}
-% \input{sections/references}
+\newpage
+\section{\sectionTitleReferences}
+\input{sections/references}
 
 % Appendices switch to appendix numbering before loading appendix content.
-% \newpage
-% \appendix
-% \section{\sectionTitleAppendices}
-% \input{sections/appendices}
+\newpage
+\appendix
+\section{\sectionTitleAppendices}
+\input{sections/appendices}
 
 % The final signature is injected as a footer mark on the last page.
-% \input{sections/final-signature}
+\input{sections/final-signature}
 
 \end{document}
