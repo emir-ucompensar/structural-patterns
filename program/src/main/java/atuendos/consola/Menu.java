@@ -14,9 +14,11 @@ import atuendos.modelo.Altura;
 import atuendos.modelo.Cliente;
 import atuendos.modelo.Empleado;
 import atuendos.modelo.Prenda;
+import atuendos.modelo.PrendaEnLavanderia;
 import atuendos.modelo.ServicioAlquiler;
 import atuendos.modelo.TipoPrenda;
 import atuendos.modelo.TipoTraje;
+import atuendos.negocio.EnvioLavanderia;
 import atuendos.negocio.NegocioAlquiler;
 import atuendos.negocio.ServiciosDeCliente;
 
@@ -42,9 +44,12 @@ public class Menu {
     private static final String MSG_DESPEDIDA = "Hasta pronto.";
     private static final String MSG_SIN_SERVICIOS = "No hay servicios para mostrar.";
     private static final String MSG_SIN_PRENDAS = "No hay prendas para mostrar.";
+    private static final String MSG_SIN_PENDIENTES = "No hay prendas pendientes de envío.";
 
     private static final String[] CABECERA_SERVICIOS = {"Número", "Solicitud", "Alquiler", "Cliente",
         "Empleado", "Prendas"};
+    private static final String[] CABECERA_LAVANDERIA = {"Turno", "Referencia", "Tipo", "Color", "Talla",
+        "Prioridad", "Detalle"};
     private static final String[] CABECERA_PRENDAS = {"Referencia", "Tipo", "Color", "Marca", "Talla",
         "Alquiler", "Detalle"};
 
@@ -87,7 +92,11 @@ public class Menu {
                         new Opcion("Consultar prendas por talla", this::consultarPrendasPorTalla),
                         new Opcion("Listar prendas", this::listarPrendas),
                         new Opcion("Listar clientes", this::listarClientes),
-                        new Opcion("Listar empleados", this::listarEmpleados))));
+                        new Opcion("Listar empleados", this::listarEmpleados))),
+                new Grupo("Lavandería", List.of(
+                        new Opcion("Registrar prenda para lavandería", this::registrarEnLavanderia),
+                        new Opcion("Ver prendas pendientes de envío", this::verPendientesDeLavanderia),
+                        new Opcion("Enviar prendas a lavandería", this::enviarALavanderia))));
     }
 
     /**
@@ -291,6 +300,54 @@ public class Menu {
                 empleado.getTelefono(), empleado.getCargo()});
         }
         mostrarPersonas(new String[] {"Identificación", "Nombre", "Dirección", "Teléfono", "Cargo"}, filas);
+    }
+
+    private void registrarEnLavanderia() throws AtuendosException {
+        terminal.seccion("Registrar prenda para lavandería");
+        String referencia = terminal.leerObligatorio("Referencia de la prenda");
+        boolean prioritaria = terminal.confirmar("¿Con prioridad? (manchada, delicada o decisión del administrador)");
+        PrendaEnLavanderia registro = negocio.registrarEnLavanderia(referencia, prioritaria);
+        terminal.exito(prioritaria ? "Prenda registrada con prioridad." : "Prenda registrada por orden de llegada.");
+        terminal.ficha("Lavandería", List.of(
+                new String[] {"Referencia", registro.prenda().getReferencia()},
+                new String[] {"Tipo", registro.prenda().getTipo().name()},
+                new String[] {"Talla", registro.prenda().getTalla()},
+                new String[] {"Prioridad", registro.prioritaria() ? "Sí" : "No"}));
+    }
+
+    private void verPendientesDeLavanderia() throws AtuendosException {
+        terminal.seccion("Prendas pendientes de envío");
+        List<PrendaEnLavanderia> pendientes = negocio.listarLavanderiaPendiente();
+        if (pendientes.isEmpty()) {
+            terminal.info(MSG_SIN_PENDIENTES);
+        } else {
+            mostrarEnvio(pendientes);
+        }
+    }
+
+    private void enviarALavanderia() throws AtuendosException {
+        terminal.seccion("Enviar prendas a lavandería");
+        EnvioLavanderia envio = negocio.enviarALavanderia(terminal.leerEntero("Cantidad de prendas a enviar"));
+        if (envio.prendas().isEmpty()) {
+            terminal.info(MSG_SIN_PENDIENTES);
+            return;
+        }
+        int cantidad = envio.prendas().size();
+        terminal.exito(cantidad + (cantidad == 1 ? " prenda enviada" : " prendas enviadas") + " a lavandería el "
+                + formatear(envio.fecha()) + ".");
+        terminal.seccion("Notificación de envío");
+        mostrarEnvio(envio.prendas());
+    }
+
+    private void mostrarEnvio(List<PrendaEnLavanderia> registros) {
+        List<String[]> filas = new ArrayList<>();
+        int turno = 1;
+        for (PrendaEnLavanderia registro : registros) {
+            Prenda prenda = registro.prenda();
+            filas.add(new String[] {String.valueOf(turno++), prenda.getReferencia(), prenda.getTipo().name(),
+                prenda.getColor(), prenda.getTalla(), registro.prioritaria() ? "Sí" : "No", prenda.detalle()});
+        }
+        terminal.tabla(CABECERA_LAVANDERIA, filas);
     }
 
     private void mostrarPersonas(String[] cabeceras, List<String[]> filas) {

@@ -7,6 +7,7 @@
 package atuendos.consola;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import atuendos.comun.AtuendosException;
@@ -175,5 +176,51 @@ class MenuTest {
     void listaVaciaInformaQueNoHayRegistros() {
         String salida = ejecutar("3\n3\n0\n");
         assertTrue(salida.contains("No hay registros para mostrar"));
+    }
+
+    @Test
+    void registraUnaPrendaParaLavanderiaConPrioridad() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\ns\n0\n");
+        assertTrue(salida.contains("Prenda registrada con prioridad"));
+    }
+
+    @Test
+    void registraUnaPrendaParaLavanderiaPorOrdenDeLlegada() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\nn\n0\n");
+        assertTrue(salida.contains("Prenda registrada por orden de llegada"));
+    }
+
+    @Test
+    void noRegistraDosVecesLaMismaPrendaEnLavanderia() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\nn\n4\n1\nF-01\nn\n0\n");
+        assertTrue(salida.contains("ya está en la lista de lavandería"));
+    }
+
+    @Test
+    void verLaListaPendienteNoLaEnvia() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\nn\n4\n2\n4\n2\n0\n");
+        assertTrue(salida.contains("Prendas pendientes de envío"));
+        assertFalse(salida.contains("Notificación de envío"));
+        assertFalse(salida.contains("No hay prendas pendientes de envío"));
+    }
+
+    @Test
+    void avisaSiNoHayPrendasPendientes() {
+        assertTrue(ejecutar("4\n2\n0\n").contains("No hay prendas pendientes de envío"));
+        assertTrue(ejecutar("4\n3\n5\n0\n").contains("No hay prendas pendientes de envío"));
+    }
+
+    @Test
+    void enviaUnaTandaYMuestraLaNotificacion() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\nn\n4\n3\n5\n4\n2\n0\n");
+        assertTrue(salida.contains("1 prenda enviada a lavandería el 22/10/2026"));
+        assertTrue(salida.contains("Notificación de envío"));
+        assertTrue(salida.contains("disfraz de Dinosaurio"));
+        assertTrue(salida.contains("No hay prendas pendientes de envío"));
+    }
+
+    @Test
+    void rechazaUnaCantidadNoPositiva() {
+        assertTrue(ejecutar("4\n3\n0\n0\n").contains("mayor que cero"));
     }
 }
