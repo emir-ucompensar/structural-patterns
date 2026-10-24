@@ -41,6 +41,12 @@
 % the URLs in the reference list. The body font of the reference list is not
 % touched.
 
+% babel names tables "Cuadro" in Spanish, so captions would disagree with the
+% "Tabla" prefix used by \intab.
+\ifnum\pdfstrcmp{\documentLanguage}{spanish}=0
+  \addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
+\fi
+
 % Localized prefixes, resolved from documentLanguage.
 \newcommand{\prefixFigure}{%
   \ifnum\pdfstrcmp{\documentLanguage}{spanish}=0 Figura\else Figure\fi}
