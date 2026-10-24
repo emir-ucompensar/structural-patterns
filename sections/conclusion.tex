@@ -5,4 +5,14 @@
 % Keep the conclusion focused on what was learned, why it matters, and what work
 % could follow.
 
-% Placeholder for conclusion content
+Logré una aplicación en Java que cubre las operaciones solicitadas, con Factory Method, Singleton y Facade en el código, y 114 pruebas que pasan.
+
+Los tres patrones respondieron a necesidades concretas del caso, y la fachada se volvió el punto por el que pasa todo. Hoy contiene reglas de negocio, como las validaciones del servicio de alquiler, y puede crecer con facilidad. Si el programa se amplía, esas reglas merecen clases propias.
+
+Singleton resolvió la conexión única, y las pruebas me exigieron un método de reinicio para usar bases temporales. Ese método existe solo para las pruebas.
+
+No medí acoplamiento ni cohesión con herramientas, y la justificación de cada patrón se apoya en la literatura que revisé.
+
+El programa solo registra y consulta. Modificar y borrar registros, devolver prendas y atender varios usuarios a la vez quedaron fuera. La regla de que la fecha de alquiler no sea anterior a hoy fue decisión mía.
+
+Parte del código se generó con asistencia de herramientas de inteligencia artificial, y yo lo revisé, lo probé y respondo por él. Yo hice las pruebas manuales de la consola.
