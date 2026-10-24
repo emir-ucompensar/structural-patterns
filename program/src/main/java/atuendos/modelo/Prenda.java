@@ -46,7 +46,7 @@ public abstract class Prenda {
      *
      * @return los datos específicos en una línea
      */
-    protected abstract String detalle();
+    public abstract String detalle();
 
     public String getReferencia() {
         return referencia;

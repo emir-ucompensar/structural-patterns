@@ -35,7 +35,7 @@ public class Disfraz extends Prenda {
     }
 
     @Override
-    protected String detalle() {
+    public String detalle() {
         return "disfraz de " + nombre;
     }
 

@@ -38,7 +38,7 @@ public class TrajeCaballero extends Prenda {
     }
 
     @Override
-    protected String detalle() {
+    public String detalle() {
         return String.format("traje %s, %s", tipoTraje, aderezo);
     }
 

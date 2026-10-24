@@ -41,7 +41,7 @@ public class VestidoDama extends Prenda {
     }
 
     @Override
-    protected String detalle() {
+    public String detalle() {
         return String.format("pedrería %s, %s, %d piezas", pedreria ? "sí" : "no", altura, cantidadPiezas);
     }
 
