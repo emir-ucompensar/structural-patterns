@@ -1,0 +1,92 @@
+% SPDX-License-Identifier: MIT
+%
+% packages.tex - Load LaTeX packages required by the APA7 template.
+%
+% Keep package loading centralized so document sections can focus on content
+% rather than dependencies.
+
+%
+% Language and encoding
+%
+
+% babel must see the resolved documentLanguage value from config/structure.tex.
+\usepackage[\documentLanguage]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+%
+% APA formatting base
+%
+
+\usepackage{apacite}
+\usepackage{setspace}
+\onehalfspacing
+
+%
+% Page layout
+%
+
+% APA-style papers use one inch margins on all sides.
+\usepackage[margin=1in]{geometry}
+
+%
+% Graphics and links
+%
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfigure}
+\usepackage[hidelinks]{hyperref}
+
+% PDF properties are configured at begin-document time after hyperref is ready.
+\AtBeginDocument{
+  \hypersetup{
+    pdftitle={\pdfTitle},
+    pdfauthor={\pdfAuthor},
+    pdfsubject={\pdfSubject},
+    pdfkeywords={\pdfKeywords}
+  }
+}
+
+%
+% Tables
+%
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+
+%
+% Bibliography and citations
+%
+
+\usepackage{natbib}
+
+%
+% Mathematics and scientific notation
+%
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathdots}
+\usepackage{siunitx}
+
+%
+% Code and color
+%
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+%
+% Lists, page state, and utilities
+%
+
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{datetime}
+\usepackage{xifthen}
+\usepackage{xparse}
+\usepackage{comment}

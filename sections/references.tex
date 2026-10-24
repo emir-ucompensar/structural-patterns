@@ -1,0 +1,10 @@
+% SPDX-License-Identifier: MIT
+%
+% references.tex - Render BibTeX references in APA style.
+%
+% The enclosing section title is defined in main.tex. bibsection is disabled here
+% so apacite does not create a duplicate heading.
+
+\renewcommand\bibsection{\relax}
+\bibliographystyle{apacite}
+\bibliography{main}

@@ -1,0 +1,107 @@
+% SPDX-License-Identifier: MIT
+%
+% structure.tex - Structural settings for the APA7 paper template.
+%
+% Controls how the PDF is built and laid out rather than what it says: language
+% and academic period defaults, academic period output, and localized labels and
+% section titles. Document values such as title, authors, and advisor live in
+% data/metadata.tex.
+%
+% Language and academic period are resolved in this order, highest priority
+% first:
+%
+%   1. compile.sh flags        ./compile.sh --language spanish --period semester
+%   2. Defaults in this file   \documentLanguageDefault, \academicPeriodDefault
+%   3. Built-in defaults       english, year
+%
+% compile.sh passes the final values to TeX, so compile through it rather
+% than calling pdflatex directly.
+
+\def\documentLanguageDefault{english}
+\def\academicPeriodDefault{year}
+
+\edef\documentLanguage{\documentLanguageDefault}
+\edef\academicPeriod{\academicPeriodDefault}
+\edef\metadataLanguageOverride{\documentLanguageOverride}
+\edef\metadataPeriodOverride{\academicPeriodOverride}
+
+\ifx\metadataLanguageOverride\empty\else
+  \edef\documentLanguage{\metadataLanguageOverride}
+\fi
+
+\ifx\metadataPeriodOverride\empty\else
+  \edef\academicPeriod{\metadataPeriodOverride}
+\fi
+
+%
+% Academic period
+%
+
+% academic_period - Select year or semester output.
+%
+% The boolean is derived from academicPeriod so manual configuration and
+% compile-time flags use the same code path.
+\newif\ifusesemester
+\edef\metadataSelectedPeriod{\academicPeriod}%
+\def\metadataSemesterPeriod{semester}%
+\ifx\metadataSelectedPeriod\metadataSemesterPeriod
+  \usesemestertrue
+\else
+  \usesemesterfalse
+\fi
+
+\newcommand{\academicYear}{\the\year-\the\numexpr\year+1\relax}
+\newcommand{\academicSemester}{\the\year-\ifnum\month<7 S01\else S02\fi}
+
+%
+% Localization
+%
+
+% localized_labels - Select labels from the resolved language.
+%
+% Unknown language values fall back to English. compile.sh validates known values
+% before TeX starts, but this fallback keeps direct TeX runs predictable.
+%
+% A new section added to main.tex needs its own \sectionTitle... entry in both
+% branches below.
+\edef\metadataSelectedLanguage{\documentLanguage}%
+\def\metadataSpanishLanguage{spanish}%
+\ifx\metadataSelectedLanguage\metadataSpanishLanguage
+  \def\labelAuthors{Autores}
+  \def\labelAdvisor{Orientador}
+  \def\labelAcademicYear{Año Académico}
+  \def\labelAcademicSemester{Semestre Académico}
+  \def\labelDate{Fecha}
+
+  \def\sectionTitleAbstract{Resumen}
+  \def\sectionTitleKeywords{Palabras clave}
+  \def\sectionTitleAcknowledgments{Agradecimientos}
+  \def\sectionTitleIntroduction{Introducción}
+  \def\sectionTitleTheoreticalFramework{Marco teórico}
+  \def\sectionTitleMethodology{Metodología}
+  \def\sectionTitleResults{Resultados}
+  \def\sectionTitleAnalysis{Análisis}
+  \def\sectionTitleConclusion{Conclusión}
+  \def\sectionTitleGlossary{Glosario}
+  \def\sectionTitleReferences{Referencias}
+  \def\sectionTitleAppendices{Apéndices}
+\else
+  \def\labelAuthors{Authors}
+  \def\labelAdvisor{Advisor}
+  \def\labelAcademicYear{Academic Year}
+  \def\labelAcademicSemester{Academic Semester}
+  \def\labelDate{Date}
+
+  \def\sectionTitleAbstract{Abstract}
+  \def\sectionTitleKeywords{Keywords}
+  \def\sectionTitleAcknowledgments{Acknowledgments}
+  \def\sectionTitleIntroduction{Introduction}
+  \def\sectionTitleTheoreticalFramework{Theoretical Framework}
+  \def\sectionTitleMethodology{Methodology}
+  \def\sectionTitleResults{Results}
+  \def\sectionTitleAnalysis{Analysis}
+  \def\sectionTitleConclusion{Conclusion}
+  \def\sectionTitleGlossary{Glossary}
+  \def\sectionTitleReferences{References}
+  \def\sectionTitleAppendices{Appendices}
+\fi

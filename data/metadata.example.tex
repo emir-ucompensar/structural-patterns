@@ -1,0 +1,97 @@
+% SPDX-License-Identifier: MIT
+%
+% metadata.example.tex - Example metadata for the paper template.
+%
+% Copy this file to data/metadata.tex and replace the sample values with real
+% project data.
+%
+% Language and academic period are configured in config/structure.tex.
+
+%
+% Output file name
+%
+
+% output_file_name - Define the name of the exported PDF.
+%
+% compile.sh reads these two fields (they are not used inside the document) and
+% names the generated PDF:
+%
+%   build/YYYY-MM-DD-<fileAuthorName>-<fileName>.pdf
+%
+% The date is the day of the build, the same one \today prints. Both values are
+% converted to lowercase ASCII with dashes, so "Análisis de Circuitos" becomes
+% "analisis-de-circuitos". Leave \fileName empty to build main.pdf instead.
+% \fileAuthorName is optional and is skipped when empty.
+\def\fileName{research-project-title}
+\def\fileAuthorName{john-doe}
+
+%
+% Cover page information (visible)
+%
+
+% cover_page_info - Define the information printed on the cover page.
+%
+% These fields are visible in the document and may also be reused by other
+% template sections. Keep required values non-empty in real papers.
+\def\projectTitle{Your research project title goes here}
+\def\institution{University or institution name goes here}
+\def\faculty{Faculty or department name goes here}
+\def\program{Program or course name goes here}
+\def\projectDate{\today}
+
+%
+% PDF metadata (not visible)
+%
+
+% pdf_metadata - Define PDF document properties.
+%
+% These values are NOT shown in the document. hyperref stores them only in the
+% PDF file's metadata, which PDF viewers display in the document properties
+% dialog. They are independent from the cover page fields above, so update both
+% when the title or author changes.
+\def\pdfTitle{Your research project title goes here}
+\def\pdfAuthor{Jhon Doe}
+\def\pdfSubject{Research document on electric potential and conducting materials}
+\def\pdfKeywords{electric potential, conductivity, materials, research}
+
+%
+% Authors (cover page, visible)
+%
+
+% primary_author - Define the required main author.
+%
+% ORCID is optional. Leave it empty when it is not available.
+\def\authorPrimary{Jhon Doe}
+\def\emailAuthorPrimary{john.doe@email.net}
+\def\orcidAuthorPrimary{0000-0000-0000-0000}
+
+% additional_authors - Define optional co-authors.
+%
+% Empty names are skipped by the cover page. Keep related email and ORCID fields
+% empty when the author slot is unused.
+\def\authorSecondary{}
+\def\emailAuthorSecondary{}
+\def\orcidAuthorSecondary{}
+
+\def\authorThird{}
+\def\emailAuthorThird{}
+\def\orcidAuthorThird{}
+
+\def\authorFourth{}
+\def\emailAuthorFourth{}
+\def\orcidAuthorFourth{}
+
+\def\authorFifth{}
+\def\emailAuthorFifth{}
+\def\orcidAuthorFifth{}
+
+%
+% Advisor (cover page, visible)
+%
+
+% advisor_metadata - Define optional advisor information.
+%
+% The cover page prints this block only when advisor is not empty.
+\def\advisor{Ms. Kylie Robertson}
+\def\emailAdvisor{kylier@email.net}
+\def\orcidAdvisor{0000-0000-0000-0001}

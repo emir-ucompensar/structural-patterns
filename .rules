@@ -1,0 +1,48 @@
+# Project agent instructions
+
+## Requirements
+
+Follow `REQUIREMENTS.md` and `TODO.md`, when present, for the document format and every task rule. Do not assume a fixed style.
+
+Create `REQUIREMENTS.md` or `TODO.md` only if it does not exist, and write to it only while it is empty. Once either has content, never modify it: the only allowed change is checking or unchecking `TODO.md` items, and only for items that are complete and meet what the files establish.
+
+## Build and inspection
+
+Never run `compile.sh` or any other compilation command unless the user explicitly asks.
+
+To inspect or validate the compiled PDF, use only this command, which always skips the cover page and keeps the file name (it carries the author) out of the output:
+
+```bash
+pdftotext -f 2 -layout build/*.pdf -
+```
+
+Never open the PDF or read its metadata by any other means. If no PDF exists, ask the user to compile it.
+
+## Private data
+
+Never read, write or commit anything under `data/`.
+
+## Skills
+
+Treat one agent conversation as one session. Load each required skill at most once per session and reuse its instructions. Reload it only in a new conversation, after context compaction removed its instructions, when its `SKILL.md` changed, or when the user asks.
+
+- `file-naming`: load before any project task and follow it for every file or directory you create or rename. A path change is incomplete until all references are updated.
+- `latex-writing`: load before reading, creating, editing, reviewing or formatting any LaTeX document (`*.tex`, `*.sty`, `*.cls`) and follow it.
+- `research-helper`: load only during research sessions; outside them, do not use it. The `research/` directory is the local source base, indexed in `research/_index.md`: consult it instead of the internet and change it only in research sessions.
+
+## Git
+
+Before editing the template, check that the project root is inside a Git repository; if not, run `git init`. Right after, tell the user in the chat to define their credentials with these commands, using their own data, and wait for their confirmation:
+
+```bash
+git config user.name "<name>"
+git config user.email "<email>"
+```
+
+Once the user confirms, check that it works with `git var GIT_AUTHOR_IDENT` and report the result in the chat.
+
+Keep commits simple and minimal, split by similar or shared responsibility. Never commit build artifacts, generated PDFs, logs or backups unless the user explicitly asks.
+
+## References
+
+Store references as BibTeX entries in `main.bib` with lowercase ASCII `kebab-case` keys and explicit fields for every known bibliographic component. Add only references validated by the agent and confirmed by the user. Entries already in `main.bib` count as validated and are not re-verified.

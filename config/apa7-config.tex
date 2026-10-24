@@ -1,0 +1,106 @@
+% SPDX-License-Identifier: MIT
+%
+% apa7-config.tex - Configure APA7-oriented document formatting.
+%
+% This file owns global page, heading, caption, and table-of-contents behavior.
+% Content files should not redefine these rules locally.
+
+%
+% Font and spacing
+%
+
+% New PX provides rounded Palatino-style text with matching mathematical glyphs.
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+
+% The template uses compact one-and-a-half spacing instead of full double space.
+\setstretch{1.5}
+
+% APA-style paragraph indentation is one half inch.
+\setlength{\parindent}{0.5in}
+
+%
+% Title page helper
+%
+
+% maketitlepage - Render a compact metadata-driven title page.
+%
+% The main document currently uses sections/cover-page.tex. This helper remains
+% available for custom documents that want a minimal built-in title page.
+\newcommand{\maketitlepage}{%
+    \thispagestyle{empty}
+    \vspace*{2in}
+    \begin{center}
+        \textbf{\projectTitle}\\
+        \vspace{1in}
+        \textbf{\authorPrimary}
+        \ifx\authorSecondary\empty\else
+            \\ \authorSecondary
+        \fi
+        \ifx\authorThird\empty\else
+            \\ \authorThird
+        \fi
+        \ifx\authorFourth\empty\else
+            \\ \authorFourth
+        \fi
+        \ifx\authorFifth\empty\else
+            \\ \authorFifth
+        \fi
+        \vspace{1.5in}
+        \institution\\
+        \program\\
+        \academicYear\\
+    \end{center}
+    \newpage
+}
+
+%
+% Page style
+%
+
+% Page numbers are placed in the top-right corner without header rules.
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\setlength{\headheight}{14.5pt}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+%
+% Headings
+%
+
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries\itshape}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\itshape}{\thesubsubsection.}{0.5em}{}
+
+% Keep vertical spacing predictable around headings.
+\titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{6pt plus 2pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{12pt plus 4pt minus 2pt}{6pt plus 2pt minus 1pt}
+\titlespacing*{\subsubsection}{0pt}{12pt plus 4pt minus 2pt}{6pt plus 2pt minus 1pt}
+
+\setcounter{secnumdepth}{3}
+
+%
+% Captions
+%
+
+\usepackage{caption}
+\captionsetup{
+    labelsep=period,
+    font=it,
+    margin=0pt,
+    justification=justified
+}
+
+%
+% Table of contents
+%
+
+% The subfigure option prevents tocloft from redefining counters already created
+% by the legacy subfigure package.
+\usepackage[subfigure]{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforesecskip}{0.1cm}
+\setlength{\cftbeforesubsecskip}{0.05cm}

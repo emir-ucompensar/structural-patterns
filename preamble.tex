@@ -1,0 +1,116 @@
+% SPDX-License-Identifier: MIT
+%
+% preamble.tex - Load document metadata, packages, and template styles.
+%
+% Structure is loaded first because later package configuration depends on the
+% resolved language and academic period, then metadata supplies document values.
+
+\documentclass[12pt, letterpaper, oneside]{article}
+
+% Structure resolves runtime switches, language, and localized labels.
+\input{config/structure}
+
+% Metadata supplies document values such as title and authors.
+\input{data/metadata}
+
+% Packages may depend on metadata values such as documentLanguage.
+\input{config/packages}
+
+% APA7 rules are layered before project-specific helper styles.
+\input{config/apa7-config}
+\input{config/styles}
+
+% ORCID icon package for the cover page author identifiers.
+\usepackage{orcidlink}
+
+% Inline reference commands: modular, localized, monospace.
+%
+% Usage:
+%   \inref{label}   raw number, e.g. "1"
+%   \infig{label}   "Figure 1" or "Figura 1"
+%   \intab{label}   "Table 1" or "Tabla 1"
+%   \ineq{label}    "Equation 1" or "Ecuación 1"
+%   \insec{label}   "Section 1" or "Sección 1"
+%   \inapp{label}   "Appendix A" or "Apéndice A"
+%   \incite{key}    in-text citation
+%   \incitep{key}   parenthetical citation: (Author, Year)
+%   \incitet{key}   narrative citation: Author (Year)
+%
+% Everything is set in monospace to stand out from the body text and to match
+% the URLs in the reference list. The body font of the reference list is not
+% touched.
+
+% Localized prefixes, resolved from documentLanguage.
+\newcommand{\prefixFigure}{%
+  \ifnum\pdfstrcmp{\documentLanguage}{spanish}=0 Figura\else Figure\fi}
+\newcommand{\prefixTable}{%
+  \ifnum\pdfstrcmp{\documentLanguage}{spanish}=0 Tabla\else Table\fi}
+\newcommand{\prefixEquation}{%
+  \ifnum\pdfstrcmp{\documentLanguage}{spanish}=0 Ecuación\else Equation\fi}
+\newcommand{\prefixSection}{%
+  \ifnum\pdfstrcmp{\documentLanguage}{spanish}=0 Sección\else Section\fi}
+\newcommand{\prefixAppendix}{%
+  \ifnum\pdfstrcmp{\documentLanguage}{spanish}=0 Apéndice\else Appendix\fi}
+
+% Raw number in monospace.
+\newcommand{\inref}[1]{\texttt{\ref{#1}}}
+
+% Localized prefix plus number, all in monospace.
+\newcommand{\infig}[1]{\texttt{\prefixFigure~\ref{#1}}}
+\newcommand{\intab}[1]{\texttt{\prefixTable~\ref{#1}}}
+\newcommand{\ineq}[1]{\texttt{\prefixEquation~\ref{#1}}}
+\newcommand{\insec}[1]{\texttt{\prefixSection~\ref{#1}}}
+\newcommand{\inapp}[1]{\texttt{\prefixAppendix~\ref{#1}}}
+
+% Monospace for natbib citations.
+%
+% Do not patch the bodies of \cite, \citep and \citet with \pretocmd or
+% \apptocmd. natbib opens a group at the start of each command and closes it
+% deep inside \@citex, so an appended \endgroup lands where \@ifstar is still
+% reading its argument and the build dies with "Missing \endcsname inserted".
+%
+% Instead, keep a copy of each natbib command and redefine the public name
+% with xparse. The wrapper sets \ttfamily inside its own group and forwards
+% the star and both optional arguments unchanged, so the reference list font
+% and the optional-argument behavior stay as they are.
+%
+% \MonoNatbibCmd{name} wraps \name. Needs LaTeX 2022-06 or newer for
+% \NewCommandCopy.
+\makeatletter
+\NewDocumentCommand{\MonoNatbibCmd}{ m }{%
+  \expandafter\NewCommandCopy
+    \csname mono@orig@#1\expandafter\endcsname\csname #1\endcsname
+  \expandafter\RenewDocumentCommand\csname #1\endcsname{ s o o m }{%
+    {\ttfamily
+     \IfBooleanTF{##1}%
+       {\IfNoValueTF{##2}%
+          {\csname mono@orig@#1\endcsname*{##4}}%
+          {\IfNoValueTF{##3}%
+             {\csname mono@orig@#1\endcsname*[##2]{##4}}%
+             {\csname mono@orig@#1\endcsname*[##2][##3]{##4}}}}%
+       {\IfNoValueTF{##2}%
+          {\csname mono@orig@#1\endcsname{##4}}%
+          {\IfNoValueTF{##3}%
+             {\csname mono@orig@#1\endcsname[##2]{##4}}%
+             {\csname mono@orig@#1\endcsname[##2][##3]{##4}}}}}}%
+}
+
+% Wrap after all packages are loaded. Without natbib this does nothing.
+\AtBeginDocument{%
+  \@ifpackageloaded{natbib}{%
+    \@for\mono@name:=cite,citep,citet,citealp,citealt\do{%
+      \expandafter\MonoNatbibCmd\expandafter{\mono@name}}%
+  }{}}
+\makeatother
+
+% Explicit helpers. They forward optional notes to the wrapped natbib
+% commands, which already set the monospace font.
+\NewDocumentCommand{\incite}{ o o m }{%
+  \IfNoValueTF{#1}{\cite{#3}}{%
+    \IfNoValueTF{#2}{\cite[#1]{#3}}{\cite[#1][#2]{#3}}}}
+\NewDocumentCommand{\incitep}{ o o m }{%
+  \IfNoValueTF{#1}{\citep{#3}}{%
+    \IfNoValueTF{#2}{\citep[#1]{#3}}{\citep[#1][#2]{#3}}}}
+\NewDocumentCommand{\incitet}{ o o m }{%
+  \IfNoValueTF{#1}{\citet{#3}}{%
+    \IfNoValueTF{#2}{\citet[#1]{#3}}{\citet[#1][#2]{#3}}}}

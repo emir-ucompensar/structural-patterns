@@ -1,0 +1,101 @@
+% SPDX-License-Identifier: MIT
+%
+% styles.tex - Define project-specific visual helpers.
+%
+% Package-level APA rules live in apa7-config.tex. This file provides reusable
+% commands and environments for content authors.
+
+%
+% Colors
+%
+
+\usepackage{xcolor}
+\definecolor{darkblue}{RGB}{0, 51, 102}
+\definecolor{lightgray}{RGB}{240, 240, 240}
+\definecolor{codebackground}{RGB}{245, 245, 245}
+
+%
+% Code listings
+%
+
+% Listings are configured once so code blocks remain visually consistent across
+% all sections.
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    breakatwhitespace=true,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    backgroundcolor=\color{codebackground},
+    frame=lines,
+    framesep=10pt,
+    rulecolor=\color{lightgray},
+    showstringspaces=false,
+    keywordstyle=\color{darkblue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{darkgreen},
+    numbers=left,
+    numbersep=10pt,
+    numberstyle=\tiny\color{gray}
+}
+
+%
+% Links
+%
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkblue,
+    citecolor=darkblue,
+    urlcolor=darkblue
+}
+
+%
+% Inline helpers
+%
+
+\newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
+\newcommand{\note}[1]{{\small\textit{Note: #1}}}
+\newcommand{\important}[1]{{\textbf{\textcolor{darkblue}{#1}}}}
+
+%
+% Lists
+%
+
+% Use simple round bullets instead of square defaults.
+\renewcommand{\labelitemi}{\textbullet}
+\renewcommand{\labelitemii}{\textopenbullet}
+\renewcommand{\labelitemiii}{\textendash}
+\renewcommand{\labelitemiv}{\textperiodcentered}
+
+%
+% APA tables
+%
+
+% Internal row spacing for compact APA-style tables.
+\newcommand{\apatablestretch}{0.55}
+
+% apatable - Render a compact table with an optional APA note.
+% @arg1: Optional note rendered below the table.
+% @arg2: Label suffix. The environment prefixes it with tab:.
+% @arg3: Table caption.
+% @arg4: Tabular column specification.
+\NewDocumentEnvironment{apatable}{ O{} m m m }{%
+    \begin{table}[H]%
+    \centering%
+    \renewcommand{\arraystretch}{\apatablestretch}%
+    \caption{#3}%
+    \label{tab:#2}%
+    \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}#4}%
+    \toprule%
+}{%
+    \bottomrule%
+    \end{tabular*}%
+    \ifthenelse{\equal{#1}{}}{}{%
+        \par\vspace{4pt}%
+        \begin{minipage}{\linewidth}%
+            \centering%
+            \footnotesize\textit{Note.}~#1%
+        \end{minipage}%
+    }%
+    \end{table}%
+}

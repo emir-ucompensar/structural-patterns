@@ -1,0 +1,119 @@
+% SPDX-License-Identifier: MIT
+%
+% cover-page.tex - Render the metadata-driven cover page.
+%
+% Displayed values come from data/metadata.tex and localized labels from
+% config/structure.tex. Optional people and institution fields are skipped when
+% their metadata values are empty.
+%
+% ORCID identifiers are rendered inline next to the email with the official icon
+% (via orcidlink) and the numeric ID in monospace font, linked to orcid.org.
+
+\newpage
+\thispagestyle{empty}
+\vspace*{0.8cm}
+
+% renderAuthorOrcid - Display an ORCID icon and clicable monospace ID.
+%
+% The icon comes from the orcidlink package and links to the orcid.org profile.
+% The numeric ID is shown in monospace alongside the icon. Both elements sit on
+% the same baseline so the visual weight stays balanced.
+\newcommand{\renderAuthorOrcid}[1]{%
+  \orcidlink{#1}\,{\texttt{\href{https://orcid.org/#1}{#1}}}%
+}
+
+\begin{center}
+
+\begin{minipage}{0.8\textwidth}
+\centering
+\Large\textbf{\projectTitle}
+\end{minipage}
+
+\vspace{2cm}
+
+% Authors are grouped under the localized author label.
+\large\textbf{\labelAuthors:}\\[0.3cm]
+
+% The primary author is always rendered.
+\normalsize\textbf{\authorPrimary}\\[0.05cm]
+\normalfont\emailAuthorPrimary
+\ifx\orcidAuthorPrimary\empty\else
+  \quad\renderAuthorOrcid{\orcidAuthorPrimary}
+\fi
+
+% Additional authors are rendered only when the name field is not empty.
+\ifx\authorSecondary\empty\else
+  \\[0.3cm]
+  \textbf{\authorSecondary}\\[0.05cm]
+  \normalfont\emailAuthorSecondary
+  \ifx\orcidAuthorSecondary\empty\else
+    \quad\renderAuthorOrcid{\orcidAuthorSecondary}
+  \fi
+\fi
+
+\ifx\authorThird\empty\else
+  \\[0.3cm]
+  \textbf{\authorThird}\\[0.05cm]
+  \normalfont\emailAuthorThird
+  \ifx\orcidAuthorThird\empty\else
+    \quad\renderAuthorOrcid{\orcidAuthorThird}
+  \fi
+\fi
+
+\ifx\authorFourth\empty\else
+  \\[0.3cm]
+  \textbf{\authorFourth}\\[0.05cm]
+  \normalfont\emailAuthorFourth
+  \ifx\orcidAuthorFourth\empty\else
+    \quad\renderAuthorOrcid{\orcidAuthorFourth}
+  \fi
+\fi
+
+\ifx\authorFifth\empty\else
+  \\[0.3cm]
+  \textbf{\authorFifth}\\[0.05cm]
+  \normalfont\emailAuthorFifth
+  \ifx\orcidAuthorFifth\empty\else
+    \quad\renderAuthorOrcid{\orcidAuthorFifth}
+  \fi
+\fi
+
+% Advisor metadata is optional and omitted when advisor is empty.
+\ifx\advisor\empty\else
+  \vspace{1.5cm}
+  \large\textbf{\labelAdvisor:}\\[0.3cm]
+  \normalsize\textbf{\advisor}\\[0.05cm]
+  \normalfont\emailAdvisor
+  \ifx\orcidAdvisor\empty\else
+    \quad\renderAuthorOrcid{\orcidAdvisor}
+  \fi
+\fi
+
+\vspace{1cm}
+
+% Institution lines are optional so the template can compile when metadata is
+% still empty.
+\normalsize
+\ifx\institution\empty\else
+  \institution\\
+\fi
+\ifx\faculty\empty\else
+  \faculty\\
+\fi
+\ifx\program\empty\else
+  \program\\
+\fi
+
+\ifusesemester
+  \labelAcademicSemester: \academicSemester\\
+\else
+  \labelAcademicYear: \academicYear\\
+\fi
+
+\vspace{1cm}
+
+\labelDate: \projectDate
+
+\end{center}
+
+\newpage

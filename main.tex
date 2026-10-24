@@ -1,0 +1,76 @@
+% SPDX-License-Identifier: MIT
+%
+% main.tex - Document entry point for the paper template.
+%
+% The document body is intentionally assembled from files in sections/. Visible
+% section names come from config/metadata.tex so compile-time language flags can
+% localize the generated paper without editing this file.
+%
+% Every section below is commented out except the table of contents. Uncomment
+% only the sections the current work needs. New sections must be created under
+% sections/, get a localized title in config/metadata.tex, and be indexed here.
+%
+% Typical build:
+%
+%   ./compile.sh
+
+\input{preamble}
+
+\begin{document}
+
+% Render the cover page before numbered front matter begins.
+% \input{sections/cover-page}
+
+% Keep the table of contents under the same page style used by the paper body.
+\begingroup
+\pagestyle{fancy}
+\tableofcontents
+\addtocontents{toc}{\protect\thispagestyle{fancy}}
+\endgroup
+\newpage
+
+% Front matter is unnumbered and remains directly editable by the author.
+% \input{sections/abstract}
+% \input{sections/keywords}
+% \input{sections/acknowledgments}
+
+% Main sections use localized titles resolved from metadata. Start the
+% introduction on a fresh page after the front matter.
+
+% \newpage
+% \section{\sectionTitleIntroduction}
+% \input{sections/introduction}
+
+% \section{\sectionTitleTheoreticalFramework}
+% \input{sections/theoretical-framework}
+
+% \section{\sectionTitleMethodology}
+% \input{sections/methodology}
+
+% \section{\sectionTitleResults}
+% \input{sections/results}
+
+% \section{\sectionTitleAnalysis}
+% \input{sections/analysis}
+
+% \section{\sectionTitleConclusion}
+% \input{sections/conclusion}
+
+% \section{\sectionTitleGlossary}
+% \input{sections/glossary}
+
+% References are handled by BibTeX through sections/references.tex.
+% \newpage
+% \section{\sectionTitleReferences}
+% \input{sections/references}
+
+% Appendices switch to appendix numbering before loading appendix content.
+% \newpage
+% \appendix
+% \section{\sectionTitleAppendices}
+% \input{sections/appendices}
+
+% The final signature is injected as a footer mark on the last page.
+% \input{sections/final-signature}
+
+\end{document}

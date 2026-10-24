@@ -1,0 +1,83 @@
+# SPDX-License-Identifier: MIT
+#
+# .gitignore - Exclude private, transient, and generated project files.
+#
+# NOTE! Don't add files that are generated in specific subdirectories here
+# if they belong to a self-contained component. Add them in a ".gitignore"
+# file in that subdirectory instead.
+#
+# NOTE! Please use 'git status --ignored' or
+# 'git ls-files -i -c --exclude-per-directory=.gitignore'
+# after changing this file to verify that no tracked files are unintentionally
+# ignored.
+#
+
+#
+# Normal rules (sorted alphabetically)
+#
+.*.sw?
+*~
+*.aux
+*.bak
+*.bbl
+*.bcf
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.py[cod]
+*.run.xml
+*.snm
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.toc
+*.vrb
+
+#
+# Document build output (compile.sh / latexmk)
+#
+/build/
+/drafts/
+/research/
+/main.pdf
+
+#
+# Private metadata and local configurations
+#
+/data/metadata.tex
+/data/metadata.ucompensar.tex
+/config/private/
+
+#
+# Internal agent skills kept local only
+#
+/.agents/skills/generate-requirements/
+
+#
+# Research scripts and Python runtime (scripts/)
+#
+__pycache__/
+/scripts/.venv/
+/scripts/output/
+/scripts/results/
+
+#
+# Backup archives and partial snapshots (backup.sh)
+#
+/backup/*.partial
+/backup/*.tar.gz
+
+#
+# OS and editor artifacts
+#
+.DS_Store
+Thumbs.db
