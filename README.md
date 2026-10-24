@@ -1,6 +1,15 @@
-# APA7 Paper Template
+# Los Atuendos: Creational and Structural Design Patterns
 
-A minimal, modular LaTeX template for APA 7 research papers.
+This repository holds the LaTeX source of the design report and the Java
+application that implements it.
+
+**Looking for the program?** The source code, the build instructions and the
+instructions to run it are in [`program/README.md`](program/README.md).
+
+## APA7 Paper Template
+
+A minimal, modular LaTeX template for APA 7 research papers, used for the
+report.
 
 `main.tex` assembles metadata, content, references, and APA formatting into a
 single PDF.
