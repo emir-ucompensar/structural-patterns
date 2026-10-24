@@ -66,6 +66,43 @@ public final class Constantes {
     /** Mensaje cuando ya hay una prenda con esa referencia; recibe la referencia. */
     public static final String MSG_PRENDA_EXISTE = "Ya existe una prenda con la referencia %s.";
 
+    /** Formato de las fechas que se muestran al usuario. */
+    public static final String FORMATO_FECHA = "dd/MM/yyyy";
+
+    /** Mensaje cuando el cliente del servicio no existe; recibe la identificación. */
+    public static final String MSG_CLIENTE_NO_REGISTRADO = "El cliente %s no está registrado.";
+
+    /** Mensaje cuando el empleado del servicio no existe; recibe la identificación. */
+    public static final String MSG_EMPLEADO_NO_REGISTRADO = "El empleado %s no está registrado.";
+
+    /** Mensaje cuando una prenda del servicio no existe; recibe la referencia. */
+    public static final String MSG_PRENDA_NO_REGISTRADA = "La prenda %s no está registrada.";
+
+    /** Mensaje cuando una prenda ya está alquilada; recibe la referencia y la fecha. */
+    public static final String MSG_PRENDA_NO_DISPONIBLE = "La prenda %s no está disponible para el %s.";
+
+    /** Mensaje cuando una referencia se repite dentro del servicio; recibe la referencia. */
+    public static final String MSG_PRENDA_REPETIDA = "La prenda %s está repetida en el servicio.";
+
+    /** Mensaje cuando el servicio no incluye prendas. */
+    public static final String MSG_SIN_PRENDAS = "El servicio debe incluir al menos una prenda.";
+
+    /** Mensaje cuando la fecha de alquiler ya pasó; recibe la fecha de hoy. */
+    public static final String MSG_FECHA_PASADA = "La fecha de alquiler no puede ser anterior a hoy (%s).";
+
+    /** Mensaje cuando un servicio guardado referencia datos que no existen; recibe el número. */
+    public static final String MSG_SERVICIO_INCONSISTENTE = "El servicio %d tiene datos inconsistentes.";
+
+    /** Nombres de los campos de una persona y del servicio, usados en mensajes. */
+    public static final String CAMPO_TIPO = "tipo";
+    public static final String CAMPO_IDENTIFICACION = "identificacion";
+    public static final String CAMPO_NOMBRE = "nombre";
+    public static final String CAMPO_DIRECCION = "direccion";
+    public static final String CAMPO_TELEFONO = "telefono";
+    public static final String CAMPO_CORREO = "correo";
+    public static final String CAMPO_CARGO = "cargo";
+    public static final String CAMPO_FECHA_ALQUILER = "fechaAlquiler";
+
     private Constantes() {
     }
 }
