@@ -20,6 +20,12 @@
 \def\documentLanguageDefault{spanish}
 \def\academicPeriodDefault{semester}
 
+% compile.sh defines both overrides before this file loads. Editors and linters
+% that open the files without compile.sh get empty overrides instead of an
+% undefined control sequence.
+\providecommand{\documentLanguageOverride}{}
+\providecommand{\academicPeriodOverride}{}
+
 \edef\documentLanguage{\documentLanguageDefault}
 \edef\academicPeriod{\academicPeriodDefault}
 \edef\metadataLanguageOverride{\documentLanguageOverride}
