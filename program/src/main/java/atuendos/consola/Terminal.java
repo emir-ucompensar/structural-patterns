@@ -30,9 +30,9 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 /**
- * Entrada y salida de la interfaz de texto. En una terminal real dibuja con
- * colores y marcos Unicode, edita las líneas de texto y deja elegir con las
- * flechas; con la entrada redirigida usa texto plano y opciones numeradas.
+ * Entrada y salida de la interfaz de texto. Dibuja solo con caracteres ASCII.
+ * En una terminal real usa colores, edita las líneas de texto y deja elegir con
+ * las flechas; con la entrada redirigida usa opciones numeradas.
  */
 public class Terminal implements AutoCloseable {
 
@@ -53,10 +53,8 @@ public class Terminal implements AutoCloseable {
     private static final String MSG_SI_NO = "Se esperaba s o n.";
     private static final String MSG_OPCION = "Opción no válida.";
     private static final String MSG_SELECCION_MINIMA = "Elige al menos %d.";
-    private static final String AYUDA_UNA = "↑↓ mover · enter elegir";
-    private static final String AYUDA_VARIAS = "↑↓ mover · espacio marcar · enter confirmar";
-    private static final String AYUDA_UNA_PLANA = "arriba/abajo mover, enter elegir";
-    private static final String AYUDA_VARIAS_PLANA = "arriba/abajo mover, espacio marcar, enter confirmar";
+    private static final String AYUDA_UNA = "flechas: mover | enter: elegir";
+    private static final String AYUDA_VARIAS = "flechas: mover | espacio: marcar | enter: confirmar";
     private static final int ESPERA_TECLA_MS = 100;
 
     private enum Tecla {
@@ -74,7 +72,7 @@ public class Terminal implements AutoCloseable {
      *
      * @param entrada flujo de lectura
      * @param salida flujo de escritura
-     * @param ansi si se usan colores y marcos Unicode
+     * @param ansi si se usan colores
      */
     public Terminal(InputStream entrada, PrintStream salida, boolean ansi) {
         this.entrada = new Scanner(entrada, StandardCharsets.UTF_8);
@@ -89,7 +87,7 @@ public class Terminal implements AutoCloseable {
      *
      * @param jline terminal de JLine, en modo crudo para las elecciones
      * @param salida flujo de escritura
-     * @param ansi si se usan colores y marcos Unicode
+     * @param ansi si se usan colores
      */
     Terminal(org.jline.terminal.Terminal jline, PrintStream salida, boolean ansi) {
         this.entrada = null;
@@ -154,12 +152,12 @@ public class Terminal implements AutoCloseable {
      */
     public void banner(String titulo, String subtitulo) {
         int ancho = Math.max(titulo.length(), subtitulo.length()) + 4;
-        String horizontal = ansi ? "─" : "-";
+        String horizontal = "-";
         salida.println();
-        salida.println("  " + estilo(CIAN, (ansi ? "╭" : "+") + horizontal.repeat(ancho) + (ansi ? "╮" : "+")));
+        salida.println("  " + estilo(CIAN, "+" + horizontal.repeat(ancho) + "+"));
         salida.println("  " + marco() + "  " + estilo(NEGRITA + CIAN, rellenar(titulo, ancho - 2)) + marco());
         salida.println("  " + marco() + "  " + estilo(TENUE, rellenar(subtitulo, ancho - 2)) + marco());
-        salida.println("  " + estilo(CIAN, (ansi ? "╰" : "+") + horizontal.repeat(ancho) + (ansi ? "╯" : "+")));
+        salida.println("  " + estilo(CIAN, "+" + horizontal.repeat(ancho) + "+"));
     }
 
     /**
@@ -170,7 +168,7 @@ public class Terminal implements AutoCloseable {
     public void seccion(String titulo) {
         salida.println();
         salida.println("  " + estilo(NEGRITA + CIAN, titulo));
-        salida.println("  " + estilo(TENUE, (ansi ? "─" : "-").repeat(titulo.length())));
+        salida.println("  " + estilo(TENUE, "-".repeat(titulo.length())));
     }
 
     /**
@@ -198,7 +196,7 @@ public class Terminal implements AutoCloseable {
      * @param mensaje texto del mensaje
      */
     public void exito(String mensaje) {
-        salida.println("  " + estilo(VERDE, (ansi ? "✔ " : "OK ") + mensaje));
+        salida.println("  " + estilo(VERDE, "[OK] " + mensaje));
     }
 
     /**
@@ -207,7 +205,7 @@ public class Terminal implements AutoCloseable {
      * @param mensaje texto del mensaje
      */
     public void error(String mensaje) {
-        salida.println("  " + estilo(ROJO, (ansi ? "✖ " : "ERROR ") + mensaje));
+        salida.println("  " + estilo(ROJO, "[ERROR] " + mensaje));
     }
 
     /**
@@ -216,7 +214,7 @@ public class Terminal implements AutoCloseable {
      * @param mensaje texto del mensaje
      */
     public void info(String mensaje) {
-        salida.println("  " + estilo(CIAN, (ansi ? "• " : "- ") + mensaje));
+        salida.println("  " + estilo(CIAN, "[i] " + mensaje));
     }
 
     /**
@@ -251,7 +249,7 @@ public class Terminal implements AutoCloseable {
         StringBuilder separador = new StringBuilder("  ");
         for (int i = 0; i < cabeceras.length; i++) {
             encabezado.append(rellenar(cabeceras[i], anchos[i])).append("  ");
-            separador.append((ansi ? "─" : "-").repeat(anchos[i])).append("  ");
+            separador.append("-".repeat(anchos[i])).append("  ");
         }
         salida.println(estilo(NEGRITA + CIAN, encabezado.toString().stripTrailing()));
         salida.println(estilo(TENUE, separador.toString().stripTrailing()));
@@ -271,7 +269,7 @@ public class Terminal implements AutoCloseable {
      * @return el texto sin espacios en los extremos
      */
     public String leer(String etiqueta) {
-        String indicador = "  " + estilo(NEGRITA, etiqueta) + estilo(CIAN, " › ");
+        String indicador = "  " + estilo(NEGRITA, etiqueta) + estilo(CIAN, " > ");
         if (lector == null) {
             salida.print(indicador);
             salida.flush();
@@ -529,12 +527,12 @@ public class Terminal implements AutoCloseable {
         pantalla.append("\r\u001B[2K  ").append(estilo(NEGRITA, titulo)).append('\n');
         for (int i = 0; i < opciones.size(); i++) {
             boolean actual = i == cursor;
-            String texto = (actual ? (ansi ? "❯" : ">") : " ") + " " + (varias ? (marcadas[i] ? "[*] " : "[ ] ") : "")
+            String texto = (actual ? ">" : " ") + " " + (varias ? (marcadas[i] ? "[*] " : "[ ] ") : "")
                     + opciones.get(i);
             String estilo = actual ? NEGRITA + CIAN : varias && marcadas[i] ? VERDE : "";
             pantalla.append("\r\u001B[2K  ").append(estilo.isEmpty() ? texto : estilo(estilo, texto)).append('\n');
         }
-        String ayuda = ansi ? (varias ? AYUDA_VARIAS : AYUDA_UNA) : (varias ? AYUDA_VARIAS_PLANA : AYUDA_UNA_PLANA);
+        String ayuda = varias ? AYUDA_VARIAS : AYUDA_UNA;
         pantalla.append("\r\u001B[2K  ").append(aviso != null ? estilo(ROJO, aviso) : estilo(TENUE, ayuda))
                 .append('\n');
         salida.print(pantalla);
@@ -567,7 +565,7 @@ public class Terminal implements AutoCloseable {
     }
 
     private String marco() {
-        return estilo(CIAN, ansi ? "│" : "|");
+        return estilo(CIAN, "|");
     }
 
     private static String rellenar(String texto, int ancho) {
