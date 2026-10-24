@@ -5,4 +5,173 @@
 % Include enough detail for another researcher to understand how the study was
 % conducted and how data was collected or analyzed.
 
-% Placeholder for methodology content
+\subsection{Enfoque de trabajo}
+
+Parto del enunciado de la actividad y del diagrama de clases que lo acompaña. De ahí salen el modelo de datos, la elección de los patrones, la implementación por capas y las pruebas, y cada paso queda descrito en esta sección.
+
+La aplicación está escrita en Java 21 y se construye con Maven 3.9.9, que deja un archivo ejecutable, \texttt{atuendos.jar}, con todas sus dependencias empaquetadas.
+
+La base de datos es SQLite, y el programa la usa con el controlador \texttt{sqlite-jdbc} 3.46.1.3. Las pruebas se escriben con JUnit 5.10.2, y la interfaz de consola usa JLine 3.26.3 para leer teclas y editar líneas de texto.
+
+La interfaz es de consola, con menús numerados, selección con las flechas del teclado y tablas de texto alineadas. El alcance cubre el registro de prendas, clientes, empleados y servicios de alquiler, las consultas solicitadas y la gestión de la lavandería. Modificar y borrar registros queda fuera del alcance.
+
+\subsection{Modelo de datos}
+
+\subsubsection{Modelo del dominio}
+
+\texttt{Persona} es una clase abstracta con identificación, nombre, dirección y teléfono. \texttt{Cliente} le agrega el correo, y \texttt{Empleado} le agrega el cargo.
+
+\texttt{Prenda} es una clase abstracta con referencia, color, marca, talla y valor del alquiler. \texttt{VestidoDama} agrega pedrería, altura (larga o corta) y cantidad de piezas. \texttt{TrajeCaballero} agrega el tipo de traje (convencional, frac, sacoleva u otro) y el accesorio (corbata, corbatín o plastrón). \texttt{Disfraz} agrega su nombre.
+
+La talla se elige entre XS, S, M, L, XL y XXL, y esos valores viven en una constante.
+
+\texttt{ServicioAlquiler} reúne un número consecutivo, la fecha de solicitud, la fecha de alquiler, el empleado, el cliente y una o varias prendas. La fecha de solicitud sale del reloj del sistema. Decidí que la fecha de alquiler no puede ser anterior al día de hoy.
+
+Una prenda está disponible para una fecha si ningún servicio con esa fecha de alquiler la incluye.
+
+\texttt{PrendaEnLavanderia} guarda el orden de llegada, la prenda y si es prioritaria. Cada envío toma primero las prendas prioritarias, y luego las demás por orden de llegada.
+
+\subsubsection{Modelo relacional}
+
+La \infig{fig:entidad-relacion} muestra las seis tablas y sus relaciones. Cada servicio pertenece a un cliente y a un empleado, e incluye una o varias prendas. Cada prenda puede aparecer en varios servicios y en varios registros de lavandería.
+
+\begin{figure}[H]
+\centering
+\caption{Modelo entidad-relación de la base de datos}
+\label{fig:entidad-relacion}
+% TODO: exportar figures/drawio/diagrama-entidad-relacion.drawio a PDF; mientras
+% no exista el archivo, el documento muestra un recuadro de aviso.
+\IfFileExists{figures/diagrams/diagrama-entidad-relacion.pdf}{%
+  \includegraphics[width=\textwidth]{figures/diagrams/diagrama-entidad-relacion.pdf}}{%
+  \fbox{\parbox{0.9\textwidth}{\centering Diagrama pendiente de exportar.}}}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{figure}
+
+Las decisiones de modelado son estas:
+
+\begin{itemize}
+  \item \texttt{cliente} y \texttt{empleado} usan la identificación como llave primaria. \texttt{Persona} es abstracta, y sus atributos se repiten en las dos tablas.
+  \item \texttt{prenda} es una sola tabla para los tres tipos, con la columna \texttt{tipo} como discriminador y las columnas propias de cada subtipo. Una restricción \texttt{CHECK} exige las columnas del tipo elegido y deja nulas las demás. Elegí una tabla única porque los tres tipos comparten la mayoría de sus columnas, y la consulta por talla recorre un solo lugar.
+  \item \texttt{servicio} usa un número entero autoincremental, que garantiza el consecutivo y evita reutilizar números. Sus llaves foráneas apuntan a \texttt{empleado} y \texttt{cliente}.
+  \item \texttt{servicio\_prenda} es la tabla puente entre servicios y prendas, con llave primaria compuesta.
+  \item \texttt{lavanderia} guarda el orden de llegada, la prioridad, si ya se envió y la fecha de envío. Un índice único parcial impide que una prenda quede dos veces pendiente de envío.
+\end{itemize}
+
+Las fechas se guardan como texto en formato ISO 8601. SQLite ignora las llaves foráneas por defecto, así que el programa las activa con una instrucción \texttt{PRAGMA} en cada conexión. El script completo de creación de las tablas está en los apéndices.
+
+\subsection{Diseño con patrones}
+
+La \infig{fig:clases} reúne las clases de la aplicación con los tres patrones incorporados. La consola llama a la fachada, la fachada coordina cinco repositorios, y cada repositorio es una interfaz con su implementación para SQLite. Las prendas se crean en las fábricas, y todos los repositorios reciben la conexión única.
+
+\begin{landscape}
+\begin{figure}[H]
+\centering
+\caption{Diagrama de clases con los patrones aplicados}
+\label{fig:clases}
+\includegraphics[width=\linewidth,height=\dimexpr\textheight-5em\relax,keepaspectratio]{figures/diagrams/diagrama-clases-patrones.pdf}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{figure}
+\end{landscape}
+
+\subsubsection{Factory Method}
+
+\texttt{FabricaPrenda} es el creador. Su método estático \texttt{para(tipo)} devuelve la fábrica concreta, que puede ser \texttt{FabricaVestidoDama}, \texttt{FabricaTrajeCaballero} o \texttt{FabricaDisfraz}.
+
+El método \texttt{crearPrenda} es final. Valida los datos comunes, que son referencia, color, marca, talla y valor no negativo, y llama a \texttt{crearProducto}, que es el Factory Method. Cada fábrica concreta redefine ese método para construir su prenda con los datos propios del tipo.
+
+Los datos viajan en el registro \texttt{DatosPrenda}, con un mapa para los atributos específicos de cada tipo.
+
+La \infig{fig:secuencia-factory-method} muestra la creación de un vestido de dama. La fachada valida la talla, pide la fábrica con \texttt{para(DAMA)}, invoca \texttt{crearPrenda}, y la fábrica concreta valida los datos, crea el \texttt{VestidoDama} y lo devuelve. La fachada lo entrega al repositorio con \texttt{guardar}.
+
+\begin{figure}[H]
+\centering
+\caption{Diagrama de secuencia del patrón Factory Method}
+\label{fig:secuencia-factory-method}
+\includegraphics[width=\textwidth]{figures/diagrams/diagrama-secuencia-factory-method.pdf}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{figure}
+
+\subsubsection{Singleton}
+
+\texttt{Conexion} guarda su instancia en un atributo estático, tiene el constructor privado y entrega la instancia con el método sincronizado \texttt{getInstancia}.
+
+Al crearse, abre la conexión JDBC, activa las llaves foráneas y ejecuta el esquema empaquetado como recurso. El esquema usa \texttt{CREATE TABLE IF NOT EXISTS}, y la base queda lista cuando el archivo no existe.
+
+El método \texttt{reiniciar}, visible solo dentro del paquete, deja que las pruebas usen una base temporal. El método \texttt{cerrarInstancia} cierra la conexión cuando termina el programa.
+
+La \infig{fig:secuencia-singleton} muestra el primer llamado, que crea la instancia, y los llamados siguientes, que devuelven la misma.
+
+\begin{figure}[H]
+\centering
+\caption{Diagrama de secuencia del patrón Singleton}
+\label{fig:secuencia-singleton}
+\includegraphics[width=\textwidth]{figures/diagrams/diagrama-secuencia-singleton.pdf}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{figure}
+
+\subsubsection{Facade}
+
+\texttt{NegocioAlquiler} es la fachada. El menú solo conoce esta clase, que expone una operación por cada funcionalidad: registrar y listar prendas, clientes y empleados, registrar y consultar servicios, y gestionar la lavandería.
+
+Detrás de la fachada hay cinco repositorios y un reloj inyectado, que da la fecha de solicitud y la de envío. El reloj permite probar las operaciones con una fecha fija.
+
+Registrar un servicio es la operación con más pasos. La fachada valida la fecha, busca el cliente y el empleado, y por cada referencia verifica que la prenda exista, que no se repita y que esté disponible para la fecha. Después guarda el servicio. Si una validación falla, lanza \texttt{AtuendosException} y no guarda nada.
+
+La \infig{fig:secuencia-facade} muestra ese recorrido.
+
+\begin{figure}[H]
+\centering
+\caption{Diagrama de secuencia del patrón Facade}
+\label{fig:secuencia-facade}
+\includegraphics[width=\textwidth]{figures/diagrams/diagrama-secuencia-facade.pdf}
+\par\vspace{4pt}
+{\footnotesize Fuente: Elaboración propia.}
+\end{figure}
+
+\subsection{Organización del código}
+
+El código se reparte en seis paquetes bajo \texttt{atuendos}, además de la clase \texttt{Main}, que inicia la aplicación:
+
+\begin{itemize}
+  \item \texttt{modelo}: las clases del dominio y sus enumeraciones.
+  \item \texttt{fabrica}: el creador, las tres fábricas concretas y el registro \texttt{DatosPrenda}.
+  \item \texttt{persistencia}: la conexión única, las interfaces de los repositorios y sus implementaciones para SQLite.
+  \item \texttt{negocio}: la fachada y los resultados que devuelve.
+  \item \texttt{consola}: el menú y la terminal, que leen datos y presentan resultados.
+  \item \texttt{comun}: las constantes y la excepción propia de la aplicación.
+\end{itemize}
+
+La clase \texttt{Constantes} reúne los nombres de los campos, los mensajes al usuario, las tallas admitidas, el formato de fecha y los datos de la conexión, de modo que ningún texto ni valor fijo se repite en el código.
+
+Los atributos son privados, y se acceden con métodos públicos. Las clases abstractas \texttt{Persona}, \texttt{Prenda} y \texttt{FabricaPrenda} tienen el constructor protegido. \texttt{Conexion} es final con el constructor privado, y \texttt{reiniciar} tiene visibilidad de paquete.
+
+Sigo las convenciones de escritura de Java: clases en \texttt{UpperCamelCase}, métodos y atributos en \texttt{lowerCamelCase}, constantes en \texttt{UPPER\_SNAKE\_CASE} y paquetes en minúscula. Las líneas no pasan de 120 caracteres, y los nombres están en español, como el dominio.
+
+\subsection{Manejo de excepciones y documentación}
+
+Los errores de negocio se lanzan como \texttt{AtuendosException}, con un mensaje pensado para quien usa el programa. La excepción cubre datos obligatorios vacíos, valores inválidos, registros repetidos, registros inexistentes y prendas no disponibles.
+
+La clase \texttt{ErroresBaseDatos} traduce las fallas de SQLite a mensajes claros: base ocupada, base de solo lectura, registro duplicado, referencia a datos que no existen, restricción incumplida y esquema que no coincide con el de la aplicación. Cualquier otra falla se muestra con el detalle que entrega SQLite.
+
+El menú captura \texttt{AtuendosException} y cualquier otra excepción de ejecución, muestra el mensaje y vuelve al menú, de modo que ninguna operación aborta la aplicación. Cuando la entrada termina, el programa cierra la conexión y sale.
+
+Todas las clases, interfaces y miembros públicos tienen comentarios Javadoc. La generación de la documentación con \texttt{-Xdoclint:all} termina sin advertencias.
+
+\subsection{Plan de pruebas}
+
+Las pruebas son automáticas, con JUnit 5, una práctica que \incitet{2025-varma-design-patterns-java} recomienda para los patrones de diseño. El proyecto tiene 114 pruebas, repartidas por capas:
+
+\begin{itemize}
+  \item Fábricas: 10 pruebas sobre la creación de cada tipo de prenda, los datos obligatorios y los valores inválidos.
+  \item Persistencia: 38 pruebas sobre la conexión única, los repositorios, el orden de la lavandería, la traducción de errores y el esquema desactualizado.
+  \item Fachada: 18 pruebas sobre las reglas de negocio del registro de servicios y las consultas.
+  \item Consola: 48 pruebas sobre el menú con entrada escrita, la terminal en modo texto y la terminal interactiva con teclas simuladas.
+\end{itemize}
+
+Cada prueba que usa la base de datos trabaja sobre un archivo temporal que se crea y se descarta. Las pruebas de la fachada y del menú usan un reloj fijo, y las fechas de solicitud y de envío son predecibles.
+
+Las pruebas del menú recorren cada operación solicitada con datos escritos, y comprueban el mensaje que ve el usuario. Ejecuté el programa a mano en una terminal real para revisar la selección con flechas, la limpieza de pantalla y la lista de lavandería.
