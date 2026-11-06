@@ -11,6 +11,7 @@ import atuendos.comun.Constantes;
 import atuendos.fabrica.DatosPrenda;
 import atuendos.fabrica.FabricaPrenda;
 import atuendos.modelo.Cliente;
+import atuendos.modelo.ColaLavanderia;
 import atuendos.modelo.Empleado;
 import atuendos.modelo.Prenda;
 import atuendos.modelo.PrendaEnLavanderia;
@@ -35,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -336,12 +338,12 @@ public class NegocioAlquiler {
     }
 
     /**
-     * Lista las prendas pendientes de envío a lavandería, sin enviarlas.
+     * Entrega las prendas pendientes de envío a lavandería, sin enviarlas.
      *
-     * @return las prendas pendientes, en el orden de envío
+     * @return la cola de pendientes, que se recorre en el orden de envío
      * @throws AtuendosException si falla la base de datos
      */
-    public List<PrendaEnLavanderia> listarLavanderiaPendiente() throws AtuendosException {
+    public ColaLavanderia listarLavanderiaPendiente() throws AtuendosException {
         return lavanderia.pendientes();
     }
 
@@ -358,7 +360,13 @@ public class NegocioAlquiler {
             throw new AtuendosException(Constantes.MSG_CANTIDAD_INVALIDA);
         }
         LocalDate hoy = LocalDate.now(reloj);
-        return new EnvioLavanderia(hoy, lavanderia.enviar(cantidad, hoy));
+        List<PrendaEnLavanderia> enviadas = new ArrayList<>();
+        Iterator<PrendaEnLavanderia> iterador = lavanderia.pendientes().iterator();
+        while (iterador.hasNext() && enviadas.size() < cantidad) {
+            enviadas.add(iterador.next());
+        }
+        lavanderia.marcarEnviadas(enviadas, hoy);
+        return new EnvioLavanderia(hoy, enviadas);
     }
 
     private static String validarTalla(String talla) throws AtuendosException {

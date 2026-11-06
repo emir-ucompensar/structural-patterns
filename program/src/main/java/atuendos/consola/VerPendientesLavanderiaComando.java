@@ -7,9 +7,8 @@
 package atuendos.consola;
 
 import atuendos.comun.AtuendosException;
-import atuendos.modelo.PrendaEnLavanderia;
+import atuendos.modelo.ColaLavanderia;
 import atuendos.negocio.NegocioAlquiler;
-import java.util.List;
 
 /**
  * Muestra las prendas pendientes de envío a lavandería, sin enviarlas.
@@ -31,8 +30,8 @@ final class VerPendientesLavanderiaComando extends ComandoConsola {
     @Override
     public void ejecutar() throws AtuendosException {
         terminal.seccion("Prendas pendientes de envío");
-        List<PrendaEnLavanderia> pendientes = negocio.listarLavanderiaPendiente();
-        if (pendientes.isEmpty()) {
+        ColaLavanderia pendientes = negocio.listarLavanderiaPendiente();
+        if (pendientes.estaVacia()) {
             terminal.info(Vistas.MSG_SIN_PENDIENTES);
         } else {
             Vistas.tablaLavanderia(terminal, pendientes);

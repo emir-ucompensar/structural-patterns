@@ -8,6 +8,7 @@ package atuendos.persistencia;
 
 import atuendos.comun.AtuendosException;
 import atuendos.comun.Constantes;
+import atuendos.modelo.ColaLavanderia;
 import atuendos.modelo.Prenda;
 import atuendos.modelo.PrendaEnLavanderia;
 
@@ -30,7 +31,7 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
     private static final String CONTAR_PENDIENTE =
             "SELECT COUNT(*) FROM lavanderia WHERE prenda_ref = ? AND enviada = 0";
     private static final String PENDIENTES = "SELECT orden, prenda_ref, prioritaria FROM lavanderia "
-            + "WHERE enviada = 0 ORDER BY prioritaria DESC, orden";
+            + "WHERE enviada = 0 ORDER BY orden";
     private static final String MARCAR_ENVIADA =
             "UPDATE lavanderia SET enviada = 1, fecha_envio = ? WHERE orden = ?";
 
@@ -76,7 +77,7 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
     }
 
     @Override
-    public List<PrendaEnLavanderia> pendientes() throws AtuendosException {
+    public ColaLavanderia pendientes() throws AtuendosException {
         List<int[]> filas = new ArrayList<>();
         List<String> referencias = new ArrayList<>();
         try (PreparedStatement sentencia = conexion.prepareStatement(PENDIENTES);
@@ -88,24 +89,23 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
         } catch (SQLException e) {
             throw ErroresBaseDatos.traducir(e);
         }
-        List<PrendaEnLavanderia> lista = new ArrayList<>();
+        ColaLavanderia cola = new ColaLavanderia();
         for (int i = 0; i < filas.size(); i++) {
             String referencia = referencias.get(i);
             Prenda prenda = prendas.buscar(referencia).orElseThrow(() -> new AtuendosException(
                     String.format(Constantes.MSG_LAVANDERIA_INCONSISTENTE, referencia)));
-            lista.add(new PrendaEnLavanderia(filas.get(i)[0], prenda, filas.get(i)[1] == 1));
+            cola.agregar(new PrendaEnLavanderia(filas.get(i)[0], prenda, filas.get(i)[1] == 1));
         }
-        return lista;
+        return cola;
     }
 
     @Override
-    public List<PrendaEnLavanderia> enviar(int cantidad, LocalDate fecha) throws AtuendosException {
-        List<PrendaEnLavanderia> enviadas = new ArrayList<>(pendientes().stream().limit(cantidad).toList());
+    public void marcarEnviadas(List<PrendaEnLavanderia> registros, LocalDate fecha) throws AtuendosException {
         try {
             boolean autoConfirmar = conexion.getAutoCommit();
             conexion.setAutoCommit(false);
             try (PreparedStatement sentencia = conexion.prepareStatement(MARCAR_ENVIADA)) {
-                for (PrendaEnLavanderia registro : enviadas) {
+                for (PrendaEnLavanderia registro : registros) {
                     sentencia.setString(1, fecha.toString());
                     sentencia.setInt(2, registro.orden());
                     sentencia.addBatch();
@@ -121,6 +121,5 @@ public class LavanderiaRepositorioSqlite implements LavanderiaRepositorio {
         } catch (SQLException e) {
             throw ErroresBaseDatos.traducir(e);
         }
-        return enviadas;
     }
 }

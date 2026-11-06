@@ -8,6 +8,7 @@ package atuendos.negocio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import atuendos.comun.AtuendosException;
 import atuendos.comun.Constantes;
@@ -187,12 +188,20 @@ class NegocioAlquilerTest {
     void registraVeYEnviaPrendasDeLavanderia() throws AtuendosException {
         negocio.registrarEnLavanderia("F-01", false);
         negocio.registrarEnLavanderia("F-02", true);
-        assertEquals("F-02", negocio.listarLavanderiaPendiente().get(0).prenda().getReferencia());
-        assertEquals(2, negocio.listarLavanderiaPendiente().size());
+        assertEquals("F-02", negocio.listarLavanderiaPendiente().iterator().next().prenda().getReferencia());
+        assertEquals(2, negocio.listarLavanderiaPendiente().tamano());
         EnvioLavanderia envio = negocio.enviarALavanderia(1);
         assertEquals(HOY, envio.fecha());
         assertEquals("F-02", envio.prendas().get(0).prenda().getReferencia());
-        assertEquals(1, negocio.listarLavanderiaPendiente().size());
+        assertEquals(1, negocio.listarLavanderiaPendiente().tamano());
+    }
+
+    @Test
+    void enviaLasQueHayCuandoPidenMasDeLasPendientes() throws AtuendosException {
+        negocio.registrarEnLavanderia("F-01", false);
+        assertEquals(1, negocio.enviarALavanderia(10).prendas().size());
+        assertTrue(negocio.listarLavanderiaPendiente().estaVacia());
+        assertTrue(negocio.enviarALavanderia(3).prendas().isEmpty());
     }
 
     @Test
