@@ -21,9 +21,11 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.TreeSet;
 
+import org.jline.keymap.KeyMap;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.Reference;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.TerminalBuilder;
@@ -55,12 +57,19 @@ public class Terminal implements AutoCloseable {
     private static final String MSG_OPCION = "Opción no válida.";
     private static final String MSG_PAUSA = "Presiona Enter para continuar";
     private static final String MSG_SELECCION_MINIMA = "Elige al menos %d.";
-    private static final String AYUDA_UNA = "flechas: mover | enter: elegir";
-    private static final String AYUDA_VARIAS = "flechas: mover | espacio: marcar | enter: confirmar";
+    private static final String AYUDA_UNA = "flechas: mover | enter: elegir | esc: volver";
+    private static final String AYUDA_VARIAS = "flechas: mover | espacio: marcar | enter: confirmar | esc: volver";
+    private static final String VOLVER_INTERACTIVO = "Esc o < para volver sin guardar";
+    private static final String VOLVER_TEXTO = "Escribe < para volver sin guardar";
+    /** Lo que se escribe para volver sin terminar la operación. */
+    private static final String CANCELAR = "<";
+    private static final String WIDGET_CANCELAR = "atuendos-cancelar";
+    /** Espera tras Esc para distinguirla de una tecla de flecha. */
+    private static final long ESPERA_ESCAPE_MS = 150L;
     private static final int ESPERA_TECLA_MS = 100;
 
     private enum Tecla {
-        ARRIBA, ABAJO, ESPACIO, ENTER, OTRA
+        ARRIBA, ABAJO, ESPACIO, ENTER, ESCAPE, OTRA
     }
 
     private final Scanner entrada;
@@ -68,6 +77,7 @@ public class Terminal implements AutoCloseable {
     private final boolean ansi;
     private final org.jline.terminal.Terminal jline;
     private final LineReader lector;
+    private boolean cancelado;
 
     /**
      * Crea una terminal sobre los flujos dados.
@@ -97,6 +107,15 @@ public class Terminal implements AutoCloseable {
         this.ansi = ansi;
         this.jline = jline;
         this.lector = LineReaderBuilder.builder().terminal(jline).build();
+        // Esc sola cancela la línea; la espera la separa de las flechas.
+        this.lector.setVariable(LineReader.AMBIGUOUS_BINDING, ESPERA_ESCAPE_MS);
+        this.lector.getWidgets().put(WIDGET_CANCELAR, () -> {
+            cancelado = true;
+            this.lector.getBuffer().clear();
+            this.lector.callWidget(LineReader.ACCEPT_LINE);
+            return true;
+        });
+        this.lector.getKeyMaps().get(LineReader.MAIN).bind(new Reference(WIDGET_CANCELAR), KeyMap.esc());
     }
 
     /**
@@ -290,23 +309,42 @@ public class Terminal implements AutoCloseable {
     }
 
     /**
-     * Pide un texto, que puede quedar vacío.
+     * Pide un texto, que puede quedar vacío. Si se pulsa Esc o se escribe el
+     * símbolo de volver, la lectura se cancela y la operación en curso termina
+     * sin guardar nada. Todas las demás lecturas pasan por aquí.
      *
      * @param etiqueta nombre del dato
      * @return el texto sin espacios en los extremos
      */
     public String leer(String etiqueta) {
         String indicador = "  " + estilo(NEGRITA, etiqueta) + estilo(CIAN, " > ");
+        String valor;
         if (lector == null) {
             salida.print(indicador);
             salida.flush();
-            return entrada.nextLine().trim();
+            valor = entrada.nextLine().trim();
+        } else {
+            try {
+                valor = lector.readLine(indicador).trim();
+            } catch (EndOfFileException | UserInterruptException e) {
+                throw new NoSuchElementException();
+            }
+            if (cancelado) {
+                cancelado = false;
+                throw new OperacionCancelada();
+            }
         }
-        try {
-            return lector.readLine(indicador).trim();
-        } catch (EndOfFileException | UserInterruptException e) {
-            throw new NoSuchElementException();
+        if (CANCELAR.equals(valor)) {
+            throw new OperacionCancelada();
         }
+        return valor;
+    }
+
+    /**
+     * Muestra, en texto tenue, cómo volver sin terminar la operación.
+     */
+    public void indicarComoVolver() {
+        linea(estilo(TENUE, jline != null ? VOLVER_INTERACTIVO : VOLVER_TEXTO));
     }
 
     /**
@@ -501,6 +539,10 @@ public class Terminal implements AutoCloseable {
                     cursor = (cursor + cantidad - 1) % cantidad;
                 } else if (tecla == Tecla.ABAJO) {
                     cursor = (cursor + 1) % cantidad;
+                } else if (tecla == Tecla.ESCAPE) {
+                    salida.print("\u001B[" + (opciones.size() + 2) + "A\r\u001B[J");
+                    salida.flush();
+                    throw new OperacionCancelada();
                 } else if (tecla == Tecla.ESPACIO && varias) {
                     marcadas[cursor] = !marcadas[cursor];
                 } else if (tecla == Tecla.ENTER) {
@@ -534,7 +576,7 @@ public class Terminal implements AutoCloseable {
                 int tercero = teclas.read(ESPERA_TECLA_MS);
                 return tercero == 'A' ? Tecla.ARRIBA : tercero == 'B' ? Tecla.ABAJO : Tecla.OTRA;
             }
-            return Tecla.OTRA;
+            return segundo == NonBlockingReader.READ_EXPIRED ? Tecla.ESCAPE : Tecla.OTRA;
         }
         return switch (c) {
             case 'k' -> Tecla.ARRIBA;

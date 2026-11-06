@@ -14,6 +14,9 @@ import java.util.NoSuchElementException;
  * Menú principal de la aplicación e invocador del patrón Command: muestra los
  * títulos de los comandos, ejecuta el elegido sin saber qué operación es y
  * maneja sus errores de una sola manera, de modo que ninguno aborta el programa.
+ * Cualquier comando se puede cancelar con Esc o con el símbolo de volver: el
+ * menú regresa al grupo del que vino sin guardar nada, y desde un grupo regresa
+ * al menú principal.
  */
 public class Menu {
 
@@ -22,6 +25,9 @@ public class Menu {
     private static final String MSG_INESPERADO = "Ocurrió un error inesperado. La operación no se completó.";
     private static final String MSG_OPCION_NO_VALIDA = "Opción no válida.";
     private static final String MSG_DESPEDIDA = "Hasta pronto.";
+    private static final String MSG_CANCELADA = "Operación cancelada. No se guardó ningún cambio.";
+    /** Elección que significa volver al menú anterior. */
+    private static final int VOLVER = -2;
 
     private final Terminal terminal;
     private final List<GrupoComandos> grupos;
@@ -59,6 +65,9 @@ public class Menu {
                 if (eleccion == 0) {
                     break;
                 }
+                if (eleccion == VOLVER) {
+                    continue;
+                }
                 if (eleccion < 0 || eleccion > grupos.size()) {
                     aviso = MSG_OPCION_NO_VALIDA;
                     continue;
@@ -73,22 +82,31 @@ public class Menu {
     }
 
     private void atenderGrupo(GrupoComandos grupo) {
-        terminal.limpiar();
-        terminal.seccion(grupo.titulo());
-        List<Comando> comandos = grupo.comandos();
-        for (int i = 0; i < comandos.size(); i++) {
-            terminal.opcion(String.valueOf(i + 1), comandos.get(i).titulo());
+        boolean cancelada = false;
+        while (true) {
+            terminal.limpiar();
+            terminal.seccion(grupo.titulo());
+            List<Comando> comandos = grupo.comandos();
+            for (int i = 0; i < comandos.size(); i++) {
+                terminal.opcion(String.valueOf(i + 1), comandos.get(i).titulo());
+            }
+            terminal.opcion("0", "Volver");
+            if (cancelada) {
+                terminal.info(MSG_CANCELADA);
+            }
+            int eleccion = leerOpcion();
+            if (eleccion == 0 || eleccion == VOLVER) {
+                return;
+            }
+            if (eleccion < 0 || eleccion > comandos.size()) {
+                aviso = MSG_OPCION_NO_VALIDA;
+                return;
+            }
+            cancelada = !ejecutarComando(comandos.get(eleccion - 1));
+            if (!cancelada) {
+                return;
+            }
         }
-        terminal.opcion("0", "Volver");
-        int eleccion = leerOpcion();
-        if (eleccion == 0) {
-            return;
-        }
-        if (eleccion < 0 || eleccion > comandos.size()) {
-            aviso = MSG_OPCION_NO_VALIDA;
-            return;
-        }
-        ejecutarComando(comandos.get(eleccion - 1));
     }
 
     private void mostrarAviso() {
@@ -103,13 +121,24 @@ public class Menu {
             return Integer.parseInt(terminal.leer("Opción"));
         } catch (NumberFormatException e) {
             return -1;
+        } catch (OperacionCancelada e) {
+            return VOLVER;
         }
     }
 
-    private void ejecutarComando(Comando comando) {
+    /**
+     * Ejecuta un comando y maneja su resultado.
+     *
+     * @param comando comando elegido
+     * @return falso si se canceló, para volver al grupo sin pausa
+     */
+    private boolean ejecutarComando(Comando comando) {
         terminal.limpiar();
+        terminal.indicarComoVolver();
         try {
             comando.ejecutar();
+        } catch (OperacionCancelada e) {
+            return false;
         } catch (AtuendosException e) {
             terminal.error(e.getMessage());
         } catch (NoSuchElementException e) {
@@ -119,5 +148,6 @@ public class Menu {
         }
         terminal.linea("");
         terminal.pausar();
+        return true;
     }
 }

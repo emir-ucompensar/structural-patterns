@@ -25,6 +25,8 @@ java -jar target/atuendos.jar
 
 La base de datos se crea como `atuendos.db` en el directorio de ejecución, si no existe.
 
+En cualquier formulario, Esc (o escribir `<` y Enter) vuelve al menú anterior sin guardar nada. Desde un grupo del menú, regresa al menú principal.
+
 NetBeans, IntelliJ IDEA y Eclipse abren la carpeta directamente como proyecto Maven, sin configuración adicional.
 
 ## Patrones de diseño
