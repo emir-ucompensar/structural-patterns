@@ -18,6 +18,8 @@ import atuendos.modelo.PrendaEnLavanderia;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -56,8 +58,19 @@ class LavanderiaRepositorioSqliteTest {
         BaseTemporal.cerrar();
     }
 
-    private static List<String> referencias(List<PrendaEnLavanderia> registros) {
-        return registros.stream().map(registro -> registro.prenda().getReferencia()).toList();
+    private static List<String> referencias(Iterable<PrendaEnLavanderia> registros) {
+        List<String> lista = new ArrayList<>();
+        registros.forEach(registro -> lista.add(registro.prenda().getReferencia()));
+        return lista;
+    }
+
+    private List<PrendaEnLavanderia> primeras(int cantidad) throws AtuendosException {
+        List<PrendaEnLavanderia> lista = new ArrayList<>();
+        Iterator<PrendaEnLavanderia> iterador = lavanderia.pendientes().iterator();
+        while (iterador.hasNext() && lista.size() < cantidad) {
+            lista.add(iterador.next());
+        }
+        return lista;
     }
 
     @Test
@@ -74,44 +87,40 @@ class LavanderiaRepositorioSqliteTest {
         lavanderia.registrar(a, false);
         lavanderia.pendientes();
         lavanderia.pendientes();
-        assertEquals(1, lavanderia.pendientes().size());
+        assertEquals(1, lavanderia.pendientes().tamano());
     }
 
     @Test
     void rechazaUnaPrendaYaPendiente() throws AtuendosException {
         lavanderia.registrar(a, false);
         assertThrows(AtuendosException.class, () -> lavanderia.registrar(a, true));
-        assertEquals(1, lavanderia.pendientes().size());
+        assertEquals(1, lavanderia.pendientes().tamano());
     }
 
     @Test
-    void enviaLaTandaEnElOrdenYDejaElResto() throws AtuendosException {
+    void marcaEnviadasLasPrimerasYDejaElResto() throws AtuendosException {
         lavanderia.registrar(a, false);
         lavanderia.registrar(b, true);
         lavanderia.registrar(c, false);
-        List<PrendaEnLavanderia> enviadas = lavanderia.enviar(2, HOY);
+        List<PrendaEnLavanderia> enviadas = primeras(2);
+        lavanderia.marcarEnviadas(enviadas, HOY);
         assertEquals(List.of("B", "A"), referencias(enviadas));
         assertEquals(List.of("C"), referencias(lavanderia.pendientes()));
     }
 
     @Test
-    void enviaLasQueHayCuandoPidenMas() throws AtuendosException {
+    void marcarUnaListaVaciaNoCambiaNada() throws AtuendosException {
         lavanderia.registrar(a, false);
-        assertEquals(1, lavanderia.enviar(10, HOY).size());
-        assertTrue(lavanderia.pendientes().isEmpty());
-    }
-
-    @Test
-    void sinPendientesNoEnviaNada() throws AtuendosException {
-        assertTrue(lavanderia.enviar(3, HOY).isEmpty());
+        lavanderia.marcarEnviadas(List.of(), HOY);
+        assertEquals(1, lavanderia.pendientes().tamano());
     }
 
     @Test
     void unaPrendaEnviadaPuedeVolverAlRegistrarse() throws AtuendosException {
         lavanderia.registrar(a, false);
-        lavanderia.enviar(1, HOY);
+        lavanderia.marcarEnviadas(primeras(1), HOY);
         PrendaEnLavanderia otra = lavanderia.registrar(a, true);
         assertTrue(otra.prioritaria());
-        assertFalse(lavanderia.pendientes().isEmpty());
+        assertFalse(lavanderia.pendientes().estaVacia());
     }
 }

@@ -6,6 +6,7 @@
  */
 
 /**
- * Clases del dominio: personas, prendas y servicios de alquiler.
+ * Clases del dominio: personas, prendas, servicios de alquiler y la cola de
+ * lavandería, que se recorre con su iterador (patrón Iterator).
  */
 package atuendos.modelo;

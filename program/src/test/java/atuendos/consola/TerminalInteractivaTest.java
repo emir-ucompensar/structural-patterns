@@ -123,6 +123,45 @@ class TerminalInteractivaTest {
     }
 
     @Test
+    void escCancelaUnaEleccionConFlechas() throws IOException {
+        try (Terminal terminal = terminal(ABAJO + "\u001B")) {
+            assertThrows(OperacionCancelada.class, () -> terminal.elegir("Talla", TALLAS));
+        }
+        assertTrue(salida().contains("esc: volver"));
+    }
+
+    @Test
+    void escCancelaUnaSeleccionMultiple() throws IOException {
+        try (Terminal terminal = terminal(" \u001B")) {
+            assertThrows(OperacionCancelada.class, () -> terminal.elegirVarias("Tallas", TALLAS, 1));
+        }
+    }
+
+    @Test
+    void escCancelaLaLecturaDeUnTexto() throws IOException {
+        try (Terminal terminal = terminal("Ana\u001B")) {
+            assertThrows(OperacionCancelada.class, () -> terminal.leer("Nombre"));
+        }
+    }
+
+    @Test
+    void elSimboloDeVolverCancelaEnUnaTerminalReal() throws IOException {
+        try (Terminal terminal = terminal("<\r")) {
+            assertThrows(OperacionCancelada.class, () -> terminal.leerObligatorio("Nombre"));
+        }
+    }
+
+    @Test
+    void trasCancelarLaSiguienteLecturaFuncionaNormal() throws IOException {
+        try (Terminal terminal = terminal("x\u001B")) {
+            assertThrows(OperacionCancelada.class, () -> terminal.leer("Nombre"));
+            teclado.write("Ana\r".getBytes(StandardCharsets.UTF_8));
+            teclado.flush();
+            assertEquals("Ana", terminal.leer("Nombre"));
+        }
+    }
+
+    @Test
     void sinTeclasTerminaLaEntrada() throws IOException {
         try (Terminal terminal = terminal("")) {
             teclado.close();

@@ -11,6 +11,7 @@ import atuendos.comun.Constantes;
 import atuendos.fabrica.DatosPrenda;
 import atuendos.fabrica.FabricaPrenda;
 import atuendos.modelo.Cliente;
+import atuendos.modelo.ColaLavanderia;
 import atuendos.modelo.Empleado;
 import atuendos.modelo.Prenda;
 import atuendos.modelo.PrendaEnLavanderia;
@@ -43,7 +44,8 @@ import java.util.Set;
 /**
  * Fachada de la aplicación (patrón Facade): ofrece a la consola una interfaz
  * simple y oculta los almacenes, la fábrica de prendas y la conexión. Aquí
- * viven las reglas de negocio del registro de servicios.
+ * viven las reglas de negocio del registro de servicios; la lavandería la
+ * atiende el despacho, en el que la fachada delega.
  */
 public class NegocioAlquiler {
 
@@ -51,7 +53,7 @@ public class NegocioAlquiler {
     private final EmpleadoRepositorio empleados;
     private final PrendaRepositorio prendas;
     private final ServicioRepositorio servicios;
-    private final LavanderiaRepositorio lavanderia;
+    private final DespachoLavanderia despacho;
     private final Clock reloj;
 
     /**
@@ -71,7 +73,7 @@ public class NegocioAlquiler {
         this.empleados = empleados;
         this.prendas = prendas;
         this.servicios = servicios;
-        this.lavanderia = lavanderia;
+        this.despacho = new DespachoLavanderia(lavanderia);
         this.reloj = reloj;
     }
 
@@ -332,33 +334,40 @@ public class NegocioAlquiler {
         String ref = obligatorio(Constantes.CAMPO_REFERENCIA, referencia);
         Prenda prenda = prendas.buscar(ref).orElseThrow(
                 () -> new AtuendosException(String.format(Constantes.MSG_PRENDA_NO_REGISTRADA, ref)));
-        return lavanderia.registrar(prenda, prioritaria);
+        return despacho.registrar(prenda, prioritaria);
     }
 
     /**
-     * Lista las prendas pendientes de envío a lavandería, sin enviarlas.
+     * Entrega las prendas pendientes de envío a lavandería, sin enviarlas.
      *
-     * @return las prendas pendientes, en el orden de envío
+     * @return la cola de pendientes, que se recorre en el orden de envío
      * @throws AtuendosException si falla la base de datos
      */
-    public List<PrendaEnLavanderia> listarLavanderiaPendiente() throws AtuendosException {
-        return lavanderia.pendientes();
+    public ColaLavanderia listarLavanderiaPendiente() throws AtuendosException {
+        return despacho.pendientes();
     }
 
     /**
-     * Envía una tanda de prendas a lavandería: primero las prioritarias y
-     * luego por orden de llegada. Si hay menos de las pedidas, envía las que haya.
+     * Envía una tanda de prendas a lavandería con la fecha de hoy: primero las
+     * prioritarias y luego por orden de llegada. Si hay menos de las pedidas,
+     * envía las que haya, y los suscriptores reciben el aviso del envío.
      *
      * @param cantidad cantidad de prendas que se pueden enviar hoy
      * @return la notificación con la fecha y las prendas enviadas
      * @throws AtuendosException si la cantidad no es positiva o falla la base de datos
      */
     public EnvioLavanderia enviarALavanderia(int cantidad) throws AtuendosException {
-        if (cantidad < 1) {
-            throw new AtuendosException(Constantes.MSG_CANTIDAD_INVALIDA);
-        }
-        LocalDate hoy = LocalDate.now(reloj);
-        return new EnvioLavanderia(hoy, lavanderia.enviar(cantidad, hoy));
+        return despacho.enviar(cantidad, LocalDate.now(reloj));
+    }
+
+    /**
+     * Suscribe a quien quiera recibir el aviso de cada envío a lavandería, sin
+     * que conozca al despacho.
+     *
+     * @param observador suscriptor de los envíos
+     */
+    public void suscribirALavanderia(ObservadorLavanderia observador) {
+        despacho.suscribir(observador);
     }
 
     private static String validarTalla(String talla) throws AtuendosException {

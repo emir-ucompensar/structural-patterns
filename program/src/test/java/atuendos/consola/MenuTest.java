@@ -8,6 +8,7 @@ package atuendos.consola;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import atuendos.comun.AtuendosException;
@@ -58,7 +59,7 @@ class MenuTest {
         ByteArrayOutputStream capturada = new ByteArrayOutputStream();
         Terminal terminal = new Terminal(new ByteArrayInputStream(entrada.getBytes(StandardCharsets.UTF_8)),
                 new PrintStream(capturada, true, StandardCharsets.UTF_8), false);
-        new Menu(terminal, negocio).ejecutar();
+        new Menu(terminal, CatalogoComandos.grupos(terminal, negocio)).ejecutar();
         return capturada.toString(StandardCharsets.UTF_8);
     }
 
@@ -232,6 +233,55 @@ class MenuTest {
         assertTrue(salida.contains("Prendas pendientes de envío"));
         assertFalse(salida.contains("Notificación de envío"));
         assertFalse(salida.contains("No hay prendas pendientes de envío"));
+    }
+
+    @Test
+    void enviaUnaTandaYLaNotificacionDeConsolaMuestraLasPrendas() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\ns\n4\n3\n1\n0\n");
+        assertTrue(salida.contains("1 prenda enviada a lavandería el 22/10/2026."));
+        assertTrue(salida.contains("Notificación de envío"));
+        assertTrue(salida.contains("Dinosaurio"));
+    }
+
+    @Test
+    void cancelarUnRegistroVuelveAlGrupoSinGuardar() throws AtuendosException {
+        String salida = ejecutar("1\n1\n3\nF-09\n<\n0\n0\n");
+        assertTrue(salida.contains("Operación cancelada. No se guardó ningún cambio."));
+        assertTrue(negocio.listarPrendas().isEmpty());
+        assertTrue(salida.contains("Hasta pronto"));
+    }
+
+    @Test
+    void trasCancelarSePuedeElegirOtraOperacionDelMismoGrupo() {
+        String salida = ejecutar("1\n1\n<\n2\n100\nAna Pérez\nCalle 1\n300\nana@correo.co\n0\n");
+        assertTrue(salida.contains("Operación cancelada"));
+        assertTrue(salida.contains("Cliente registrado"));
+    }
+
+    @Test
+    void cancelarUnServicioANoGuardaNada() {
+        ejecutar(CLIENTE + EMPLEADO + DISFRAZ + "2\n1\n100\n200\n01/11/2026\nF-01\n<\n0\n0\n");
+        assertThrows(AtuendosException.class, () -> negocio.consultarServicio(1));
+    }
+
+    @Test
+    void cadaFormularioIndicaComoVolver() {
+        assertTrue(ejecutar("1\n2\n<\n0\n0\n").contains("Escribe < para volver sin guardar"));
+    }
+
+    @Test
+    void elSimboloDeVolverEnUnGrupoRegresaAlMenuPrincipal() {
+        String salida = ejecutar("1\n<\n0\n");
+        assertFalse(salida.contains("Opción no válida"));
+        assertTrue(salida.indexOf("Menú principal") != salida.lastIndexOf("Menú principal"));
+        assertTrue(salida.contains("Hasta pronto"));
+    }
+
+    @Test
+    void elSimboloDeVolverEnElMenuPrincipalNoSale() {
+        String salida = ejecutar("<\n0\n");
+        assertFalse(salida.contains("Opción no válida"));
+        assertTrue(salida.contains("Hasta pronto"));
     }
 
     @Test

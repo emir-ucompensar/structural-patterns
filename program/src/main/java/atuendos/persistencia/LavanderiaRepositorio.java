@@ -7,6 +7,7 @@
 package atuendos.persistencia;
 
 import atuendos.comun.AtuendosException;
+import atuendos.modelo.ColaLavanderia;
 import atuendos.modelo.Prenda;
 import atuendos.modelo.PrendaEnLavanderia;
 
@@ -29,22 +30,20 @@ public interface LavanderiaRepositorio {
     PrendaEnLavanderia registrar(Prenda prenda, boolean prioritaria) throws AtuendosException;
 
     /**
-     * Lista las prendas pendientes de envío: primero las prioritarias y luego
-     * por orden de llegada. No las envía.
+     * Entrega las prendas pendientes de envío dentro de una cola, que las
+     * recorre en el orden de envío. No las envía.
      *
-     * @return las prendas pendientes, en el orden de envío
+     * @return la cola de prendas pendientes
      * @throws AtuendosException si falla la base de datos
      */
-    List<PrendaEnLavanderia> pendientes() throws AtuendosException;
+    ColaLavanderia pendientes() throws AtuendosException;
 
     /**
-     * Envía las primeras prendas pendientes y las marca como enviadas. Si hay
-     * menos de las pedidas, envía las que haya.
+     * Marca como enviados los registros dados, todos o ninguno.
      *
-     * @param cantidad cantidad máxima de prendas a enviar
+     * @param registros registros que salen hacia la lavandería
      * @param fecha fecha del envío
-     * @return las prendas enviadas, en el orden en que salieron
      * @throws AtuendosException si falla la base de datos
      */
-    List<PrendaEnLavanderia> enviar(int cantidad, LocalDate fecha) throws AtuendosException;
+    void marcarEnviadas(List<PrendaEnLavanderia> registros, LocalDate fecha) throws AtuendosException;
 }
