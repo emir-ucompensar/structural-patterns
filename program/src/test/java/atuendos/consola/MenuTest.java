@@ -58,7 +58,7 @@ class MenuTest {
         ByteArrayOutputStream capturada = new ByteArrayOutputStream();
         Terminal terminal = new Terminal(new ByteArrayInputStream(entrada.getBytes(StandardCharsets.UTF_8)),
                 new PrintStream(capturada, true, StandardCharsets.UTF_8), false);
-        new Menu(terminal, negocio).ejecutar();
+        new Menu(terminal, CatalogoComandos.grupos(terminal, negocio)).ejecutar();
         return capturada.toString(StandardCharsets.UTF_8);
     }
 

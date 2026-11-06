@@ -7,6 +7,7 @@
 package atuendos;
 
 import atuendos.comun.AtuendosException;
+import atuendos.consola.CatalogoComandos;
 import atuendos.consola.Menu;
 import atuendos.consola.Terminal;
 import atuendos.negocio.NegocioAlquiler;
@@ -29,7 +30,8 @@ public final class Main {
         int codigo = 0;
         try (Terminal terminal = Terminal.estandar()) {
             try {
-                new Menu(terminal, NegocioAlquiler.crear()).ejecutar();
+                NegocioAlquiler negocio = NegocioAlquiler.crear();
+                new Menu(terminal, CatalogoComandos.grupos(terminal, negocio)).ejecutar();
             } catch (AtuendosException e) {
                 terminal.error(e.getMessage());
                 codigo = 1;
