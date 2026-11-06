@@ -1,0 +1,47 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% results.tex - Present the research findings.
+%
+% Use this section for measured data, computed outputs, figures, or other
+% findings produced by the study.
+
+\subsection{Diagramas modificados}
+
+De los cuatro diagramas del diseño, solo cambió el de clases. La \infig{fig:diagrama-clases-implementacion} es la versión que corresponde al código de la versión 2, y marca con un borde naranja punteado las cinco clases que cambiaron al implementar: \code{Menu}, \code{Terminal}, \code{Vistas}, \code{ColaLavanderia} y la nueva \code{OperacionCancelada}. Los motivos son los de la \intab{tab:cambios-diseno}.
+
+\begin{landscape}
+\begin{apafigure}[Las clases sin cambios respecto a la versión 1 ocultan sus atributos y métodos.]{diagrama-clases-implementacion}{Diagrama de clases de la versión 2, con los cambios de la implementación marcados}
+\includegraphics[width=\linewidth, height=0.82\textheight, keepaspectratio]{figures/diagrams/diagrama-clases-implementacion.pdf}
+\end{apafigure}
+\end{landscape}
+
+Los diagramas de secuencia de Command, Iterator y Observer no cambiaron, porque el código sigue exactamente esas interacciones. La cancelación es un camino nuevo, y en lugar de cargar el diagrama de Command con una tercera alternativa, tiene su propio diagrama en la \infig{fig:secuencia-cancelacion}. Antes de ejecutar el comando, el menú muestra cómo volver (1). Si en cualquier lectura se pulsa Esc o se escribe \code{<} (2), la terminal lanza \code{OperacionCancelada}, que pasa por el comando sin que este haya llamado a la fachada (3), y el menú muestra otra vez el grupo con el aviso de que no se guardó nada (4).
+
+\begin{apafigure}{secuencia-cancelacion}{Diagrama de secuencia de la cancelación de un comando}
+\includegraphics[width=\linewidth]{figures/diagrams/diagrama-secuencia-cancelacion.pdf}
+\end{apafigure}
+
+\subsection{Pruebas}
+
+Varma recomienda probar con pruebas unitarias el comportamiento que introduce cada patrón \incitep{2025-varma-design-patterns-java}, y por eso cada patrón tiene las suyas, separadas de las que ya traía la aplicación. Las pruebas de la versión 1 se conservaron y siguen pasando, de modo que lo que ve quien usa la aplicación no cambió. La \intab{tab:pruebas-destacadas} reúne las pruebas nuevas más destacadas, una por cada comportamiento que la versión 2 tiene que garantizar.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{\apatablestretch}
+\caption{Pruebas destacadas de la versión 2}\label{tab:pruebas-destacadas}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Patrón o cambio & Prueba y lo que demuestra \\
+\midrule
+Command & El menú ejecuta un comando de prueba que no conoce y muestra su error sin caerse, lo que demuestra que el invocador depende solo de la interfaz \code{Comando}. \\
+\addlinespace
+Iterator & Dos iteradores recorren la misma cola a la vez y cada uno entrega las prioritarias primero, porque el orden vive en la cola y cada recorrido lleva su propia posición. \\
+\addlinespace
+Observer & Dos suscriptores reciben el mismo envío, nadie recibe aviso cuando no sale ninguna prenda, y quien se retira deja de recibirlo. \\
+\addlinespace
+Volver sin guardar & Se cancela un servicio de alquiler a mitad del formulario y el servicio no existe después; Esc también cancela al escribir y al elegir con flechas. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Además de las pruebas automáticas, el ejecutable \code{atuendos.jar} se usó a mano para registrar prendas, un cliente, un empleado y un servicio, consultarlo, enviar a lavandería una prenda prioritaria registrada después de una normal y cancelar un formulario a la mitad. La prioritaria salió primero, cada envío mostró su notificación y la prenda del formulario cancelado no quedó guardada. El proyecto comprimido para la entrega, descomprimido en una carpeta limpia, compila con Maven y pasa todas sus pruebas sin depender de un entorno de desarrollo.

@@ -1,0 +1,43 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% analysis.tex - Interpret the results and discuss their meaning.
+%
+% Use this section to connect findings back to the research question and the
+% theoretical framework.
+
+\subsection{Revisión del diseño}
+
+Antes de programar se revisó el diseño contra el código de la versión 1, y se mantuvo completo. Los tres patrones siguen respondiendo a los mismos hallazgos, y Strategy sigue descartado, porque la variación por tipo de prenda continúa resuelta por Factory Method. Lo único que se decidió en esa revisión fue el orden de trabajo: primero Command, después Iterator y al final Observer, porque el despacho de Observer recorre la cola con el iterador y su suscriptor se registra desde el catálogo de comandos. Cada patrón quedó en un commit propio que compila y pasa todas las pruebas por sí solo.
+
+\subsection{Cambios al diseño}
+
+La \intab{tab:cambios-diseno} enumera los cambios que la implementación hizo sobre el diseño, en el orden en que aparecieron, cada uno con su motivo.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{\apatablestretch}
+\caption{Cambios al diseño durante la implementación}\label{tab:cambios-diseno}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Cambio & Motivo \\
+\midrule
+\code{Vistas} reúne diez métodos de fichas, tablas y formatos, y no los tres del diagrama & El diagrama mostraba tres como ejemplo; al sacar las operaciones del menú aparecieron todas las fichas y tablas que los comandos repetían. \\
+\addlinespace
+Los comandos concretos, \code{ComandoConsola} y \code{NotificacionEnvioConsola} quedan con visibilidad de paquete & Solo el catálogo de comandos los crea, así que la parte pública de la consola no crece con quince clases. \\
+\addlinespace
+\code{ColaLavanderia} agrega \code{tamano()} y \code{estaVacia()} & El listado de pendientes necesita saber si la cola está vacía para mostrar su aviso, y recorrerla solo para eso duplicaría el recorrido. \\
+\addlinespace
+La validación de la cantidad a enviar pasa de la fachada a \code{DespachoLavanderia} & Es una regla del envío, y quien envía ahora es el despacho; la fachada solo le pasa la fecha de hoy. \\
+\addlinespace
+\code{NegocioAlquiler} conserva su constructor y crea el despacho por dentro & Es la composición uno a uno del diagrama, y así ninguna clase ni prueba que arma la fachada tuvo que cambiar. \\
+\addlinespace
+Cualquier formulario se puede cancelar con Esc o escribiendo \code{<}, sin guardar nada & Al usar la aplicación, quien entraba por error a un formulario no tenía cómo volver y debía cerrar el programa. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El último cambio es el único que agrega comportamiento. \code{Terminal} lanza una \code{OperacionCancelada} cuando se pulsa Esc o se escribe el símbolo de volver, en cualquier lectura, y \code{Menu} la atrapa para cualquier comando: vuelve a mostrar el grupo del que se vino, con el aviso de que no se guardó nada, y desde un grupo regresa al menú principal. Como cada comando lee todos sus datos y llama a la fachada solo al final, cancelar a mitad de un formulario deja la base de datos igual, sin necesidad de deshacer nada.
+
+\subsection{Patrones}
+
+Ningún patrón se cambió. Command, Iterator y Observer quedaron con los participantes y las relaciones del diseño, y los patrones de la actividad anterior, Factory Method, Singleton y Facade, siguen en el mismo lugar. La cancelación encaja dentro de Command sin tocar ningún comando concreto, porque el invocador ya manejaba de una sola manera los errores de todas las operaciones, y ahora también maneja su cancelación. Observer sigue con un solo suscriptor, la notificación de consola, que es la debilidad que el diseño ya había señalado.

@@ -1,0 +1,34 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% theoretical-framework.tex - Present the theory that supports the research.
+%
+% Define the main concepts, cite relevant literature, and connect prior work to
+% the research problem.
+
+\subsection{Patrones de comportamiento}
+
+El catálogo Gang of Four reparte sus patrones en tres familias, y la de comportamiento regula la interacción entre objetos, es decir, quién le pide qué a quién y cómo se reparten las responsabilidades cuando varios objetos colaboran \incitep{2025-varma-design-patterns-java}. En su caso simulado de comercio electrónico, Varma usa Strategy para elegir el medio de pago o el descuento, y Observer para avisar de los cambios de inventario, dos situaciones muy parecidas a las de una tienda de alquiler.
+
+La lectura orientadora presenta cuatro patrones de esta familia, cada uno con su aplicabilidad, sus ventajas y sus desventajas \incitep{ucompensar-aplicabilidad-patrones-comportamiento}.
+
+\subsubsection{Iterator}
+
+Iterator se usa cuando una colección tiene una estructura interna compleja que conviene ocultar a quien la recorre, y también para no repetir el mismo código de recorrido en varios lugares. El iterador encapsula el trabajo con la estructura y le da al cliente unos pocos métodos simples para acceder a los elementos. Cumple el principio de responsabilidad única, porque saca el algoritmo de recorrido de la colección y del cliente, y el de abierto y cerrado, porque admite colecciones e iteradores nuevos sin romper el código existente. Su desventaja es que resulta excesivo cuando la aplicación solo maneja colecciones sencillas.
+
+\subsubsection{Command}
+
+Command convierte una llamada a un método en un objeto autónomo, y se usa para parametrizar objetos con operaciones. El ejemplo de la lectura es justamente un menú, cuyas opciones activan operaciones que se configuran por separado. El patrón desacopla a quien invoca una operación de quien la realiza, y permite agregar comandos nuevos sin tocar el código cliente. Además abre la puerta a deshacer, a ejecutar operaciones en diferido y a componer comandos. El precio es una capa más entre emisores y receptores, que puede complicar el código.
+
+\subsubsection{Observer}
+
+Observer se usa cuando el cambio de estado de un objeto exige cambios en otros objetos, y ese grupo de objetos se desconoce de antemano o cambia mientras el programa corre. Cualquier objeto que implemente la interfaz suscriptora puede suscribirse a las notificaciones de un notificador, y la lista de suscripción es dinámica. Se pueden agregar suscriptores nuevos sin cambiar al notificador, y la desventaja que señala la lectura es que los suscriptores reciben la notificación en un orden que no se controla.
+
+\subsubsection{Strategy}
+
+Strategy se usa cuando hay varias variantes de un algoritmo dentro de un objeto, y se quiere cambiar de una a otra durante la ejecución, o cuando una clase tiene un condicional enorme que elige entre esas variantes. Cada algoritmo pasa a su propia clase, todas con la misma interfaz, y el objeto original delega en una de ellas. La misma lectura advierte que si solo hay un par de algoritmos que casi nunca cambian, no hay una razón real para complicar el programa con las clases e interfaces que trae el patrón.
+
+\subsection{Evidencia sobre su efecto}
+
+De los cuatro candidatos, Observer es el único que aparece con resultados medidos en las fuentes revisadas. En el estudio de Abufakher sobre diez proyectos Java de código abierto, Observer mostró métricas dentro de los rangos óptimos, lo que el autor interpreta como apoyo a la mantenibilidad, la reutilización y la facilidad de prueba \incitep{2026-abufakher-gof-design-patterns-quality}. En una encuesta a desarrolladores con experiencia, Observer y Composite fueron los patrones mejor valorados \incitep{2012-zhang-follow-on-survey-patterns-controversial}.
+
+La misma evidencia pide cuidado. Observer aparece como fácil de entender en unos estudios y difícil en otros, y la explicación está en el número de clases que participan. Cada patrón es una compensación que depende del contexto, y la complejidad que se agrega para dar una flexibilidad que nadie necesita deteriora la calidad del diseño \incitep{2013-ampatzoglou-gof-design-patterns-mapping-study}. Ese es el criterio con el que se evalúan los cuatro candidatos en este documento.

@@ -1,0 +1,72 @@
+% SPDX-License-Identifier: MIT
+%
+% main.tex - Entry point of the modifications document (second deliverable).
+%
+% The document body is assembled from files in sections/, next to this file.
+% Shared template fragments (cover page, references, final signature) live in
+% config/, and document values come from data/metadata-modifications.tex.
+% Visible section names come from config/structure.tex so compile-time language
+% flags can localize the generated paper without editing this file.
+%
+% New sections must be created under sections/, get a localized title in
+% config/structure.tex, and be indexed here.
+%
+% Paths are relative to the project root, where compile.sh runs TeX. Build only
+% this document with:
+%
+%   ./compile.sh --document modifications
+
+% The variant selects data/metadata-modifications.tex in preamble.tex.
+\def\documentVariant{modifications}
+\def\documentDirectory{documents/modifications}
+
+\input{preamble}
+
+% The final signature is stamped over the last physical page, however the
+% document ends. It must be loaded here, before \begin{document}.
+\input{config/final-signature}
+
+\begin{document}
+
+% Render the cover page before numbered front matter begins.
+\input{config/cover-page}
+
+% Keep the table of contents under the same page style used by the paper body.
+\begingroup
+\pagestyle{fancy}
+\tableofcontents
+\addtocontents{toc}{\protect\thispagestyle{fancy}}
+\endgroup
+\newpage
+
+% Purpose of the document and its relation to the initial design.
+\section{\sectionTitleIntroduction}
+\input{\documentDirectory/sections/introduction}
+
+% Shared by both documents: repository, releases and how to run the program.
+\section{\sectionTitleSourceCode}
+\input{documents/shared/source-code}
+
+% Design changes and improvements, with the patterns changed and why.
+\section{\sectionTitleAnalysis}
+\input{\documentDirectory/sections/analysis}
+
+% Modified diagrams with their reason, and the tests performed.
+\section{\sectionTitleResults}
+\input{\documentDirectory/sections/results}
+
+\section{\sectionTitleConclusion}
+\input{\documentDirectory/sections/conclusion}
+
+% References are handled by biblatex and Biber through config/references.tex.
+\newpage
+\section{\sectionTitleReferences}
+\input{config/references}
+
+% Appendices are lettered. Each \section in sections/appendices.tex starts a
+% new page and renders as "Appendix A" with its title below.
+\newpage
+\appendix
+\input{\documentDirectory/sections/appendices}
+
+\end{document}

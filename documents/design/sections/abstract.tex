@@ -1,0 +1,12 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% abstract.tex - Write the paper abstract.
+%
+% Keep this section concise and focused on the research problem, method,
+% findings, and conclusion.
+
+\phantomsection
+\addcontentsline{toc}{section}{\sectionTitleAbstract}
+\begin{center}\textbf{\sectionTitleAbstract}\end{center}
+
+\noindent La aplicación de consola de ``Los Atuendos'' ya administra prendas, clientes, empleados, servicios de alquiler y lavandería con tres patrones de creación y estructurales: Factory Method, Singleton y Facade. Este diseño parte de una revisión completa de su código fuente, en busca de los puntos donde el comportamiento de los objetos está acoplado o escondido, y evalúa cuatro patrones de comportamiento candidatos: Iterator, Command, Observer y Strategy. Se eligen tres. Command convierte cada operación del menú en un objeto, Iterator saca de la consulta SQL la regla que ordena la lista de lavandería y la encierra en un recorrido propio, y Observer separa el envío a lavandería de la notificación que exige el caso. Strategy se descarta, porque la única variación por tipo de prenda ya la resuelve Factory Method. El documento reúne la tabla de patrones con su justificación, el diagrama de clases reconstruido con las tres familias de patrones y un diagrama de secuencia por patrón, elaborados en draw.io.

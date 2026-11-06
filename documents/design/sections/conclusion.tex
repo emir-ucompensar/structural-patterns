@@ -1,0 +1,12 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% conclusion.tex - Close the paper with the main outcome.
+%
+% Summarize the contribution, answer the research question, and identify
+% practical implications or future work without introducing new evidence.
+
+El diseño incorpora tres de los cuatro candidatos, Command, Iterator y Observer, y cada uno nace de un problema que se puede señalar en el código de la versión 1. El menú tenía las 14 operaciones adentro, la regla de la lavandería estaba escondida en una consulta SQL, y la notificación del envío la resolvían entre la fachada y el menú. Strategy quedó por fuera porque el problema que resolvería ya lo resuelve Factory Method.
+
+Observer llega con un solo suscriptor, y eso es lo más débil del diseño, porque su ventaja está en una lista que hoy tiene un elemento. Se mantiene porque separa el envío del aviso que pide el enunciado, y porque el siguiente suscriptor, un aviso al proveedor de lavandería, cabe sin tocar el despacho.
+
+Los nombres de clases y métodos de este documento son la propuesta para la versión 2. La implementación se hará sin perder las operaciones ni los patrones de la versión 1, con pruebas para el comportamiento de cada patrón nuevo, y todo cambio que el código obligue a hacer sobre este diseño quedará registrado, con su motivo, en el documento de modificaciones.

@@ -1,0 +1,12 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% conclusion.tex - Summarize findings and future implications.
+%
+% Keep the conclusion focused on what was learned, why it matters, and what work
+% could follow.
+
+Esta actividad se sintió como trabajo real, porque se partió de una aplicación que ya funcionaba y había que mejorarla sin romper nada de lo que ya hacía. Lo primero fue leer todo el código de la versión 1 antes de dibujar un solo diagrama, y aunque al principio parecía tiempo perdido, fue justo lo que sostuvo el diseño al programarlo, ningún patrón cambió y los ajustes de la \intab{tab:cambios-diseno} fueron detalles que solo aparecen cuando el código se escribe de verdad.
+
+Lo más difícil fue decidir qué patrones NO usar. Strategy encajaba en el papel y aun así quedó por fuera, porque no resolvía nada que Factory Method no resolviera ya, y Observer quedó con un solo suscriptor, algo que todavía deja la duda de si vale la pena, pero que se mantiene porque separa el envío del aviso y deja lista la puerta para avisarle al proveedor de lavandería. Cada patrón tiene un costo, y si ese costo no responde a una necesidad del caso, el diseño empeora en lugar de mejorar \incitep{2013-ampatzoglou-gof-design-patterns-mapping-study}.
+
+También hubo un momento frustrante, cuando al usar la aplicación terminada apareció que dentro de un formulario no había forma de regresar al menú sin cerrar el programa, algo que no estaba en el diseño, ni en el enunciado, y que ninguna prueba había detectado. Por suerte el invocador de Command ya manejaba los errores de todas las operaciones, y la cancelación cupo ahí sin tocar ningún comando. La lección que deja es clara, las pruebas protegen lo que ya se sabe que debe funcionar, pero solo usar el programa como lo haría alguien de la tienda muestra lo que todavía le falta, entonces diseñar, probar y usar lo construido van juntos, y saltarse cualquiera de los tres se nota en el producto final.

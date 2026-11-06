@@ -1,0 +1,39 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% analysis.tex - Interpret the results.
+%
+% Explain what the results mean, compare them with prior work, and discuss
+% limitations or alternative explanations.
+
+\subsection{Patrones seleccionados}
+
+La \intab{tab:patrones-comportamiento} reúne los tres patrones de comportamiento que entran al diseño, cada uno con el hallazgo que resuelve y la razón por la que mejora el diseño de ``Los Atuendos''.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{\apatablestretch}
+\caption{Patrones de comportamiento seleccionados y su justificación}\label{tab:patrones-comportamiento}
+\begin{tabularx}{\textwidth}{@{}p{2.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Patrón a utilizar & ¿Por qué contribuye a mejorar el diseño? \\
+\midrule
+Command & Las 14 operaciones del menú pasan de métodos privados de \code{Menu} a objetos con una interfaz común. Una operación nueva es una clase nueva, sin abrir el menú, y cada comando se prueba por separado. El menú, que es el invocador, maneja los errores de todas las operaciones en un solo lugar. Es el caso de uso que la lectura orientadora pone como ejemplo del patrón. \\
+\addlinespace
+Iterator & La regla de la lavandería, prioritarias primero y luego por orden de llegada, sale de una consulta SQL y queda en una sola clase del dominio. El listado de pendientes y el envío por tandas recorren la cola con el mismo iterador, sin conocer su estructura interna de dos listas. \\
+\addlinespace
+Observer & El envío a lavandería deja de cargar con la notificación que exige el enunciado. El despacho avisa a quien esté suscrito, y la consola es hoy el único suscriptor, pero un aviso al proveedor de lavandería se agregaría como otro suscriptor sin tocar el despacho. Observer mostró métricas dentro de los rangos óptimos en proyectos Java reales \incitep{2026-abufakher-gof-design-patterns-quality}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Relación entre los patrones}
+
+Los tres patrones se encadenan en una misma operación, el envío de una tanda a lavandería. El menú ejecuta \code{EnviarALavanderiaComando} sin saber qué hace (Command), el comando llama a la fachada, la fachada delega en \code{DespachoLavanderia}, el despacho recorre la cola con su iterador para tomar las prendas del día (Iterator), y al terminar avisa a sus suscriptores (Observer). Cada patrón cubre un tramo distinto del recorrido, y ninguno repite la función de otro.
+
+Los patrones de la actividad anterior siguen en el mismo recorrido. Los comandos usan la fachada como receptor, de modo que Command se apoya en Facade en lugar de reemplazarla. Las prendas que viajan dentro de la cola las reconstruye el repositorio con Factory Method, y todos los repositorios trabajan sobre la conexión única de Singleton.
+
+El diseño también responde a la advertencia con la que cerró la actividad anterior. La fachada pierde la lógica de la lavandería, que pasa al despacho, y el menú pierde las 14 operaciones, que pasan a los comandos. Las dos clases que más habían crecido quedan con una sola responsabilidad cada una.
+
+\subsection{Patrón descartado}\label{sec:patron-descartado}
+
+Strategy se evaluó contra el cuarto hallazgo, la variación por tipo de prenda, y contra la regla de la lavandería, y en los dos casos se descartó. La variación por tipo ya la resuelve Factory Method, que tiene una fábrica por tipo, y una jerarquía paralela de estrategias por tipo duplicaría esa misma división sin eliminar ninguna de las otras decisiones por tipo. La regla de la lavandería es una sola, la fija el enunciado y no cambia durante la ejecución. La lectura orientadora advierte que con un par de algoritmos que casi nunca cambian no hay una razón real para agregar las clases del patrón, y la complejidad sin la flexibilidad que la justifique deteriora la calidad \incitep{2013-ampatzoglou-gof-design-patterns-mapping-study}. Si la tienda llega a necesitar varias políticas de envío, por ejemplo por tipo de tela o por fecha de devolución, Strategy encajaría sobre la cola sin tocar su iterador.
