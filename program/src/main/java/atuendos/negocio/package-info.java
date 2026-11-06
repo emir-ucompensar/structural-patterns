@@ -6,6 +6,7 @@
  */
 
 /**
- * Reglas de negocio y fachada de la aplicación.
+ * Reglas de negocio, fachada de la aplicación (patrón Facade) y despacho de
+ * lavandería, que avisa de cada envío a sus suscriptores (patrón Observer).
  */
 package atuendos.negocio;

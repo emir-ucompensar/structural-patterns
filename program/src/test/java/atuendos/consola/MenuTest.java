@@ -235,6 +235,14 @@ class MenuTest {
     }
 
     @Test
+    void enviaUnaTandaYLaNotificacionDeConsolaMuestraLasPrendas() {
+        String salida = ejecutar(DISFRAZ + "4\n1\nF-01\ns\n4\n3\n1\n0\n");
+        assertTrue(salida.contains("1 prenda enviada a lavandería el 22/10/2026."));
+        assertTrue(salida.contains("Notificación de envío"));
+        assertTrue(salida.contains("Dinosaurio"));
+    }
+
+    @Test
     void avisaSiNoHayPrendasPendientes() {
         assertTrue(ejecutar("4\n2\n0\n").contains("No hay prendas pendientes de envío"));
         assertTrue(ejecutar("4\n3\n5\n0\n").contains("No hay prendas pendientes de envío"));

@@ -11,7 +11,8 @@ import atuendos.negocio.EnvioLavanderia;
 import atuendos.negocio.NegocioAlquiler;
 
 /**
- * Envía una tanda de prendas a lavandería y muestra la notificación del envío.
+ * Envía una tanda de prendas a lavandería. La notificación del envío la
+ * muestran los suscriptores del despacho; el comando solo avisa si no salió nada.
  */
 final class EnviarALavanderiaComando extends ComandoConsola {
 
@@ -33,12 +34,6 @@ final class EnviarALavanderiaComando extends ComandoConsola {
         EnvioLavanderia envio = negocio.enviarALavanderia(terminal.leerEntero("Cantidad de prendas a enviar"));
         if (envio.prendas().isEmpty()) {
             terminal.info(Vistas.MSG_SIN_PENDIENTES);
-            return;
         }
-        int cantidad = envio.prendas().size();
-        terminal.exito(cantidad + (cantidad == 1 ? " prenda enviada" : " prendas enviadas") + " a lavandería el "
-                + Vistas.formatear(envio.fecha()) + ".");
-        terminal.seccion("Notificación de envío");
-        Vistas.tablaLavanderia(terminal, envio.prendas());
     }
 }

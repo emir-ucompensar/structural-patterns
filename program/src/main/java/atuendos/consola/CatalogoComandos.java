@@ -11,7 +11,8 @@ import java.util.List;
 
 /**
  * Cliente del patrón Command: crea cada comando con sus receptores y los agrupa
- * como los muestra el menú.
+ * como los muestra el menú. También suscribe la notificación de envíos de la
+ * consola al despacho de lavandería (patrón Observer).
  */
 public final class CatalogoComandos {
 
@@ -19,13 +20,15 @@ public final class CatalogoComandos {
     }
 
     /**
-     * Arma los grupos de comandos del menú principal.
+     * Arma los grupos de comandos del menú principal y suscribe la notificación
+     * de envíos a lavandería. Se llama una vez por sesión de consola.
      *
      * @param terminal terminal que reciben los comandos
      * @param negocio fachada que reciben los comandos
      * @return los grupos, en el orden del menú principal
      */
     public static List<GrupoComandos> grupos(Terminal terminal, NegocioAlquiler negocio) {
+        negocio.suscribirALavanderia(new NotificacionEnvioConsola(terminal));
         return List.of(
                 new GrupoComandos("Registros", List.of(
                         new RegistrarPrendaComando(terminal, negocio),
