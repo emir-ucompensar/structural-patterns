@@ -1,0 +1,29 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% source-code.tex - Where to get, build and run the application.
+%
+% Shared by every document under documents/: each main.tex inputs it right
+% after the introduction, under \sectionTitleSourceCode. Links go on their own
+% line with \displayurl and commands use the "command" listing style.
+
+El código fuente de la aplicación está publicado en este repositorio de GitHub:
+
+\displayurl{https://github.com/emir-ucompensar/structural-patterns}
+
+Para tener una copia local, el repositorio se clona con Git:
+
+\begin{lstlisting}[style=command, language=bash]
+git clone https://github.com/emir-ucompensar/structural-patterns.git
+\end{lstlisting}
+
+Cada entrega tiene su propia versión en la página de publicaciones del repositorio:
+
+\displayurl{https://github.com/emir-ucompensar/structural-patterns/releases}
+
+La versión 1 corresponde a la entrega anterior, con los patrones de creación y estructurales, y la versión 2 corresponde a esta entrega, que agrega los patrones de comportamiento. Las dos publicaciones incluyen el ejecutable \code{atuendos.jar}, de modo que para usar la aplicación basta con descargarlo y ejecutarlo con Java 21 o superior:
+
+\begin{lstlisting}[style=command, language=bash]
+java -jar atuendos.jar
+\end{lstlisting}
+
+En el primer arranque, la aplicación crea la base de datos \code{atuendos.db} en el directorio desde donde se ejecuta.

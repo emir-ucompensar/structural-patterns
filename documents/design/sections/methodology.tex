@@ -1,0 +1,26 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% methodology.tex - Describe how the research was conducted.
+%
+% Explain the design, materials, procedures, data sources, and analysis methods
+% clearly enough for the work to be evaluated or reproduced.
+
+\subsection{Revisión del código fuente}
+
+El diseño parte de la versión 1 de la aplicación, la entregada en la actividad anterior. Su código se reparte en seis paquetes bajo \code{atuendos}: \code{modelo} con las clases del dominio, \code{fabrica} con el creador de prendas, \code{persistencia} con la conexión única y los repositorios SQLite, \code{negocio} con la fachada, \code{consola} con el menú y la terminal, y \code{comun} con las constantes y la excepción propia. Se leyeron todas las clases, y la búsqueda se concentró en los lugares donde un objeto decide demasiado, donde una regla queda escondida o donde un cambio obliga a tocar varias clases a la vez. Salieron cuatro hallazgos.
+
+El primero está en \code{Menu}, que tiene 478 líneas. Sus 14 operaciones son métodos privados de la misma clase, y cada uno lee los datos con la terminal, llama a la fachada y presenta el resultado. El menú ya las guarda como referencias a métodos dentro de una interfaz funcional, \code{Accion}, y eso es un Command a medio hacer, porque la operación existe como objeto, pero su código sigue viviendo en el menú. Agregar una operación obliga a abrir \code{Menu}, y probar una sola exige recorrer el menú completo.
+
+El segundo está en la lavandería. La regla del caso dice que las prendas prioritarias salen primero, y las demás por orden de llegada, y esa regla vive dentro de una cadena SQL en \code{LavanderiaRepositorioSqlite}, con \code{ORDER BY prioritaria DESC, orden}. El listado de pendientes y el envío por tandas dependen de ese orden, y el envío lo reutiliza tomando los primeros elementos de la lista. Nada en el dominio dice cómo se ordena la cola, y si la regla cambia, el cambio se hace en una consulta.
+
+El tercero también está en la lavandería. El enunciado pide que, al enviar una tanda, se muestre un mensaje de notificación con los datos de las prendas enviadas. Hoy la fachada devuelve un \code{EnvioLavanderia}, cuyo comentario ya lo llama notificación, y el menú arma el mensaje. Registrar, listar y enviar a lavandería son tres métodos más de la fachada, que es justo la clase que la actividad anterior señaló como cargada.
+
+El cuarto es la variación por tipo de prenda. El menú elige los campos que pregunta con un \code{switch} sobre \code{TipoPrenda}, \code{FabricaPrenda} elige la fábrica con otro, y \code{PrendaRepositorioSqlite} separa las columnas de cada tipo con \code{instanceof}. Este hallazgo es el candidato natural para Strategy, y su evaluación está en el \insec{sec:patron-descartado}.
+
+\subsection{Criterio de selección}
+
+Cada candidato se comparó con los cuatro hallazgos usando la aplicabilidad que describe la lectura orientadora. Un patrón entra al diseño cuando su aplicabilidad coincide con un hallazgo y cuando sus desventajas pesan menos que el problema que resuelve. Si el patrón agrega clases para una flexibilidad que el caso no pide, queda por fuera, aunque encaje en el papel \incitep{2013-ampatzoglou-gof-design-patterns-mapping-study}. Los patrones de creación y estructurales de la actividad anterior se conservan sin cambios en su intención.
+
+\subsection{Herramienta y convenciones de los diagramas}
+
+Los diagramas se elaboraron en draw.io, y sus archivos fuente quedan en el repositorio del documento junto a los PDF exportados. Usan los colores institucionales de la universidad, y cada clase o línea de vida lleva entre comillas angulares el rol que cumple dentro del patrón, con los nombres de la lectura orientadora: Invocador, Comando concreto, Receptor, Notificador, Suscriptor, Colección concreta e Iterador concreto. En los diagramas de secuencia, los círculos naranja numerados marcan los pasos que el texto explica, y las notas naranja aclaran una decisión de diseño en el punto donde ocurre.

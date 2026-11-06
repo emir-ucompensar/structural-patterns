@@ -1,0 +1,12 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% introduction.tex - Introduce the research problem and context.
+%
+% Establish the motivation, scope, and direction of the paper before moving into
+% theory, methods, and results.
+
+``Los Atuendos'' alquila vestidos para dama, trajes para caballero y disfraces. Su aplicación de consola, construida en la actividad anterior, registra prendas, clientes, empleados y servicios de alquiler, responde las consultas por número, por cliente, por fecha y por talla, y lleva la lista de prendas que salen hacia la lavandería, con prioridad para las manchadas o delicadas y por orden de llegada para las demás.
+
+Esa versión ya trae tres patrones. Factory Method crea cada tipo de prenda con sus datos propios, Singleton entrega una única conexión a la base de datos SQLite, y Facade le ofrece a la consola una operación por funcionalidad. La aplicación funciona y sus 114 pruebas automáticas pasan, pero la conclusión de ese trabajo dejó una advertencia: la fachada se volvió el punto por el que pasa todo, y sus reglas merecen clases propias si el programa crece.
+
+Este documento presenta el diseño que incorpora patrones de comportamiento a esa aplicación. Los candidatos son los cuatro de la lectura orientadora, Iterator, Command, Observer y Strategy, y un patrón entra al diseño solo si resuelve un problema que se pueda señalar en el código. Por eso el trabajo empezó por leer el código fuente completo, y cada decisión de este documento se apoya en una clase, un método o una consulta concreta. La implementación y los cambios que surjan al programarla quedan para el documento de modificaciones.
